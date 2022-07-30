@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# build artifacts (dirs)
+build/
+bin/
+lib/
+gtest/
