@@ -9,8 +9,10 @@
 
 namespace {
 
+constexpr size_t NUM_ELEMENTS = 1'000;
+
 TEST(quickTest, random_1000) {
-  std::vector<uint64_t> values(1000, 0);
+  std::vector<uint64_t> values(NUM_ELEMENTS, 0);
   std::iota(values.begin(), values.end(), 0);
   const auto verify = values; // sorted
 
@@ -26,7 +28,7 @@ TEST(quickTest, random_1000) {
 }
 
 TEST(quickTest, ordered) {
-  std::vector<uint64_t> values(1000, 0);
+  std::vector<uint64_t> values(NUM_ELEMENTS, 0);
   std::iota(values.begin(), values.end(), 0);
   const auto verify = values; // sorted
 
@@ -36,7 +38,7 @@ TEST(quickTest, ordered) {
 }
 
 TEST(quickTest, inverted) {
-  std::vector<uint64_t> values(1000, 0);
+  std::vector<uint64_t> values(NUM_ELEMENTS, 0);
   std::iota(values.rbegin(), values.rend(), 0); // inverted
   auto verify = values;
   std::iota(verify.begin(), verify.end(), 0); // sorted
@@ -49,7 +51,7 @@ TEST(quickTest, inverted) {
 }
 
 TEST(quickTest, constant) {
-  std::vector<uint64_t> values(1000, 7);
+  std::vector<uint64_t> values(NUM_ELEMENTS, 7);
   const auto verify = values;
 
   _quick_sort(values.data(), values.data() + values.size());
