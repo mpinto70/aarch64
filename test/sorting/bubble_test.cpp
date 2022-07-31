@@ -1,4 +1,4 @@
-#include "sorting/quick.h"
+#include "sorting/bubble.h"
 
 #include <gtest/gtest.h>
 
@@ -11,7 +11,7 @@ namespace {
 
 constexpr size_t NUM_ELEMENTS = 1'000;
 
-TEST(quickTest, random) {
+TEST(bubbleTest, random) {
   std::vector<uint64_t> values(NUM_ELEMENTS, 0);
   std::iota(values.begin(), values.end(), 0);
   const auto verify = values; // sorted
@@ -22,22 +22,22 @@ TEST(quickTest, random) {
 
   EXPECT_NE(verify, values);
 
-  _quick_sort(values.data(), values.data() + values.size());
+  _bubble_sort(values.data(), values.data() + values.size());
 
   EXPECT_EQ(verify, values);
 }
 
-TEST(quickTest, ordered) {
+TEST(bubbleTest, ordered) {
   std::vector<uint64_t> values(NUM_ELEMENTS, 0);
   std::iota(values.begin(), values.end(), 0);
   const auto verify = values; // sorted
 
-  _quick_sort(values.data(), values.data() + values.size());
+  _bubble_sort(values.data(), values.data() + values.size());
 
   EXPECT_EQ(verify, values);
 }
 
-TEST(quickTest, inverted) {
+TEST(bubbleTest, inverted) {
   std::vector<uint64_t> values(NUM_ELEMENTS, 0);
   std::iota(values.rbegin(), values.rend(), 0); // inverted
   auto verify = values;
@@ -45,16 +45,16 @@ TEST(quickTest, inverted) {
 
   EXPECT_NE(verify, values);
 
-  _quick_sort(values.data(), values.data() + values.size());
+  _bubble_sort(values.data(), values.data() + values.size());
 
   EXPECT_EQ(verify, values);
 }
 
-TEST(quickTest, constant) {
+TEST(bubbleTest, constant) {
   std::vector<uint64_t> values(NUM_ELEMENTS, 7);
   const auto verify = values;
 
-  _quick_sort(values.data(), values.data() + values.size());
+  _bubble_sort(values.data(), values.data() + values.size());
 
   EXPECT_EQ(verify, values);
 }
