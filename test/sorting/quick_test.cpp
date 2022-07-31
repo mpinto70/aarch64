@@ -9,7 +9,7 @@
 
 namespace {
 
-constexpr size_t NUM_ELEMENTS = 1'000;
+constexpr size_t NUM_ELEMENTS = 100'000;
 
 TEST(quickTest, random) {
   std::vector<uint64_t> values(NUM_ELEMENTS, 0);
