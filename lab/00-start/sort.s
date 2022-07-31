@@ -2,7 +2,6 @@
 
 .global _quick_sort
 .global _bubble_sort
-.global _getrandom
 
 .text
 
@@ -150,11 +149,3 @@ _swap_numbers:
     str     x3, [x0]
     ret
 
-// generates random bytes
-// @param x0    begin of buffer to receive the random bytes
-// @param x1    # of bytes in buffer
-_getrandom:
-    mov     x2, 0
-    mov     x8, 278     // ssize_t getrandom(void *buf, size_t buflen, unsigned int flags)
-    svc     0
-    ret

@@ -6,6 +6,7 @@ PROGS = \
         03-greater-of-two.exe \
         04-bubble-sort.exe \
         05-quick-sort.exe \
+        06-random.exe \
 
 CPROGS = \
 		test-sort.exe \

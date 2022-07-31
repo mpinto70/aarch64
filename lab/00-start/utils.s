@@ -9,6 +9,7 @@
 .global _print_ln
 .global _print_numbers
 .global _strings_to_ints
+.global _getrandom
 
 .text
 /// calculate length of a null terminated string
@@ -290,3 +291,13 @@ _print_numbers:
 .data
     space:
         .asciz " "
+
+.text
+// generates random bytes
+// @param x0    begin of buffer to receive the random bytes
+// @param x1    # of bytes in buffer
+_getrandom:
+    mov     x2, 0
+    mov     x8, 278     // ssize_t getrandom(void *buf, size_t buflen, unsigned int flags)
+    svc     0
+    ret
