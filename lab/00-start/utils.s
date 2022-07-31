@@ -33,7 +33,7 @@ _strlen:
 /// @param x0 address of begin of string
 /// @return NONE
 _print_z:
-    stp	    x29, x30, [sp, -32]!        // store x29, x30 (LR) on stack and reserve 32 bytes
+    stp     x29, x30, [sp, -32]!        // store x29, x30 (LR) on stack and reserve 32 bytes
     stp     x19, x20, [sp, 16]
 
     mov     x19, x0                     // save pointer to string
@@ -49,7 +49,7 @@ _print_z:
 
     ldp     x19, x20, [sp, 16]
 
-    ldp	    x29, x30, [sp], 32          // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 32          // restore x29, x30 (LR)
     ret
 
 .text
@@ -57,7 +57,7 @@ _print_z:
 /// @param x0 the value to print
 /// @return NONE
 _print_int:
-    stp	    x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
+    stp     x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
     add     x29, sp, 0
 
     stp     x19, x20, [sp, 16]
@@ -77,7 +77,7 @@ _print_int:
 
     ldp     x19, x20, [sp, 16]
 
-    ldp	    x29, x30, [sp], 64      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
     ret
 
 .text
@@ -88,7 +88,7 @@ _print_int:
 /// @return x0      0 success; 1 error
 ///         x1      number of chars written
 _itos:
-    stp	    x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
+    stp     x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
     add     x29, sp, 0
 
     add     x15, x29, 64            // x15 is pointer to internal buffer (1 after the end of buffer)
@@ -139,7 +139,7 @@ _itos:
         b       ._itos.loop_transfer
 
     ._itos.exit:
-    ldp	    x29, x30, [sp], 64      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
     ret
 
 .text
@@ -206,12 +206,12 @@ _break_line:    // no param
 /// @param x0 address of begin of string
 /// @return NONE
 _print_ln:
-    stp	    x29, x30, [sp, -16]!      // store x29, x30 (LR) on stack
+    stp     x29, x30, [sp, -16]!      // store x29, x30 (LR) on stack
 
     bl      _print_z
     bl      _break_line
 
-    ldp	    x29, x30, [sp], 16       // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 16       // restore x29, x30 (LR)
     ret
 
 .text
@@ -221,7 +221,7 @@ _print_ln:
 /// @param x2   array of ints (with space for at least x1 elements)
 /// @return x0  0 - success / 1 - error
 _strings_to_ints:
-    stp	    x29, x30, [sp, -32]!    // store x29, x30 (LR) on stack and reserve 32 bytes
+    stp     x29, x30, [sp, -32]!    // store x29, x30 (LR) on stack and reserve 32 bytes
     stp     x19, x20, [sp, 16]      // sotre x19 and x20 to restore at the end
     stp     x21, x22, [sp, 32]      // sotre x21 and x22 to restore at the end
 
@@ -256,7 +256,7 @@ _strings_to_ints:
     ._strings_to_ints.exit:
     ldp     x21, x22, [sp, 32]
     ldp     x19, x20, [sp, 16]
-    ldp	    x29, x30, [sp], 32      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 32      // restore x29, x30 (LR)
 
     ret
 
@@ -265,7 +265,7 @@ _strings_to_ints:
 /// @param x1   # of elements
 /// @return NONE
 _print_numbers:
-    stp	    x29, x30, [sp, -32]!    // store x29, x30 (LR) on stack and reserve 32 bytes
+    stp     x29, x30, [sp, -32]!    // store x29, x30 (LR) on stack and reserve 32 bytes
     stp     x21, x22, [sp, 16]      // sotre x21 and x22 to restore at the end
 
     mov     x21, x1
@@ -284,7 +284,7 @@ _print_numbers:
     bl      _break_line
 
     ldp     x21, x22, [sp, 16]
-    ldp	    x29, x30, [sp], 32      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 32      // restore x29, x30 (LR)
     ret
 
 .data
