@@ -22,15 +22,14 @@ _print_random:
         cbz     x20, ._print_random.loop_end
         sub     x20, x20, 1
 
-        mov     x0, x19
-        mov     x1,2
-        bl      _getrandom
-        ldrh    w0, [x19]
+        mov     x0, 50
+        mov     x1, 100
+        bl      _getrandom_between
         bl      _print_int
         bl      _break_line
         b       ._print_random.loop
     ._print_random.loop_end:
 
     ldp     x19, x20, [sp, 16]
-    ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
     ret

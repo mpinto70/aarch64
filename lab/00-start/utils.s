@@ -10,6 +10,7 @@
 .global _print_numbers
 .global _strings_to_ints
 .global _getrandom
+.global _getrandom_between
 
 .text
 /// calculate length of a null terminated string
@@ -163,9 +164,9 @@ _stoi:
         mov     x11, xzr
         ldrb    w11, [x15]      // get digit from buffer
         cmp     x11, 0x30       // verify that it is a digit
-        b.lt    ._stoi.error     // not a digit
+        b.lt    ._stoi.error    // not a digit
         cmp     x11, 0x39       // verify that it is a digit
-        b.gt    ._stoi.error     // not a digit
+        b.gt    ._stoi.error    // not a digit
         sub     x11, x11, 0x30  // convert digit to int
         mul     x17, x17, x12   // x17 *= 10 + x11
         add     x17, x17, x11
@@ -294,10 +295,36 @@ _print_numbers:
 
 .text
 // generates random bytes
-// @param x0    begin of buffer to receive the random bytes
-// @param x1    # of bytes in buffer
+// @param[out] x0   begin of buffer to receive the random bytes
+// @param x1        # of bytes in buffer
 _getrandom:
     mov     x2, 0
     mov     x8, 278     // ssize_t getrandom(void *buf, size_t buflen, unsigned int flags)
     svc     0
+    ret
+
+// generates random number between two numbers
+// @param x0    min
+// @param x1    max
+// @return x0   the random number in [x0, x1[
+_getrandom_between:
+    stp     x29, x30, [sp, -128]!
+    stp     x19, x20, [sp, 16]
+
+    mov     x19, x0
+    mov     x20, x1
+
+    add     x0, sp, 32
+    mov     x1, 8
+    bl      _getrandom
+
+    ldr     x10, [sp, 32]
+    sub     x11, x20, x19       // interval
+    udiv    x12, x10, x11       // x12 = x10 / size
+    msub    x13, x12, x11, x10  // x13 = x10 % interval
+
+    add     x0, x19, x13
+
+    ldp     x19, x20, [sp, 16]
+    ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
     ret

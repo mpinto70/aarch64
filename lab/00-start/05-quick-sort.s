@@ -92,5 +92,5 @@ _print_random:
     ._print_random.loop_end:
 
     ldp     x19, x20, [sp, 16]
-    ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 128     // restore x29, x30 (LR)
     ret
