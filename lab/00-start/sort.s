@@ -106,6 +106,10 @@ _hoare_partition:
 
     sub     x19, x0, 8          // x19 - left iterator
     mov     x20, x1             // x20 - right iterator
+
+    bl      _getrandom_between  // get a random position in [x0, x1[
+    lsr     x0, x0, 3           // make sure x0 is aligned
+    lsl     x0, x0, 3           // to 8 bytes
     ldr     x21, [x0]           // pivot value (const)
 
     ._hoare_partition.loop_forever:
