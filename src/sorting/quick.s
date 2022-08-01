@@ -54,6 +54,10 @@ _hoare_partition:
 
     sub     x19, x0, 8          // x19 - left iterator
     mov     x20, x1             // x20 - right iterator
+
+    bl      _getrandom_between  // get a random position in [x0, x1[
+    lsr     x0, x0, 3           // make sure x0 is aligned
+    lsl     x0, x0, 3           // to 8 bytes
     ldr     x21, [x0]           // pivot value (const)
 
     ._hoare_partition.loop_forever:
@@ -84,15 +88,4 @@ _hoare_partition:
     ldp     x21, x22, [sp, 32]
     ldp     x19, x20, [sp, 16]
     ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
-    ret
-
-/// swap two numbers in memory
-/// @param x0   address of first
-/// @param x1   address of second
-/// @return NONE
-_swap_numbers:
-    ldr     x2, [x0]
-    ldr     x3, [x1]
-    str     x2, [x1]
-    str     x3, [x0]
     ret
