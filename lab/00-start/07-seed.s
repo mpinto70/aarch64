@@ -21,7 +21,7 @@ _start:
     mov     x22, x1         // converted number
 
     mov     x0, x22
-    bl      _print_random
+    bl      _print_seeded
     // exit success
     mov     x0, 0
     mov     x8, __NR_exit
@@ -51,43 +51,28 @@ _start:
 
 .text
 // @param x0    # of numbers to output
-_print_random:
+_print_seeded:
     stp     x29, x30, [sp, -128]!
     stp     x19, x20, [sp, 16]
     stp     x21, x22, [sp, 32]
 
     mov     x21, x0
 
-    //mov     x20, x21                 // # of iterations
-    //._print_random.loop_1:
-    //    cbz     x20, ._print_random.loop_1_end
-    //    sub     x20, x20, 1
-    //
-    //    bl      _getrandom_64
-    //    mov     x19, x0
-    //    bl      _print_int
-    //    bl      _break_line
-    //    mov     x0, 50
-    //    mov     x1, 100
-    //    mov     x2, x19
-    //    bl      _get_seeded_between
-    //    bl      _print_int
-    //    bl      _break_line
-    //    b       ._print_random.loop_1
-    //._print_random.loop_1_end:
-
     mov     x20, x21                // # of iterations
-    ._print_random.loop_2:
-        cbz     x20, ._print_random.loop_2_end
+    ._print_seeded.loop_2:
+        cbz     x20, ._print_seeded.loop_2_end
         sub     x20, x20, 1
 
         mov     x0, 16
         mov     x1, 256
-        bl      _semi_random_pivot
+        mov     x2, x20
+        bl      _get_seeded_between
+        lsr     x0, x0, 3           // make sure x0 is aligned
+        lsl     x0, x0, 3           // to 8 bytes
         bl      _print_int
         bl      _break_line
-        b       ._print_random.loop_2
-    ._print_random.loop_2_end:
+        b       ._print_seeded.loop_2
+    ._print_seeded.loop_2_end:
 
     ldp     x19, x20, [sp, 16]
     ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)

@@ -2,6 +2,7 @@
 
 .global _quick_sort
 .global _bubble_sort
+.global _semi_random_pivot
 
 .text
 
@@ -98,6 +99,7 @@ _quick_sort:
 /// sort an array of ints (inplace) with bubble sort algorithm
 /// @param x0   begin of array
 /// @param x1   end of array (one after last - open interval)
+/// @param x2   function to get the pivot
 /// @return NONE
 _hoare_partition:
     stp     x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
@@ -107,9 +109,8 @@ _hoare_partition:
     sub     x19, x0, 8          // x19 - left iterator
     mov     x20, x1             // x20 - right iterator
 
-    bl      _getrandom_between  // get a random position in [x0, x1[
-    lsr     x0, x0, 3           // make sure x0 is aligned
-    lsl     x0, x0, 3           // to 8 bytes
+    adr     x10, _random_pivot
+    blr     x10                 // get pivot position
     ldr     x21, [x0]           // pivot value (const)
 
     ._hoare_partition.loop_forever:
@@ -141,3 +142,55 @@ _hoare_partition:
     ldp     x19, x20, [sp, 16]
     ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
     ret
+
+/// Return the pivot position in the middle of the sequence
+/// @param x0   begin of array
+/// @param x1   end of array (one after last - open interval)
+/// @return x0  pointer to pivot
+_middle_pivot:
+    sub     x10, x1, x0     // distance
+    lsl     x10, x10, 4     // x10 = x10 / 2 / 8
+    lsr     x0, x10, 3      // x0 = x10 * 8 to assure alignment
+
+    ret
+
+/// Return the random pivot position
+/// @param x0   begin of array
+/// @param x1   end of array (one after last - open interval)
+/// @return x0  pointer to pivot in the interval [x0, x1[
+_random_pivot:
+    bl      _getrandom_between  // get a random position in [x0, x1[
+    lsr     x0, x0, 3           // make sure x0 is aligned
+    lsl     x0, x0, 3           // to 8 bytes
+
+    ret
+
+/// Return a semi random pivot position (random value is cached and rotated)
+/// @param x0   begin of array
+/// @param x1   end of array (one after last - open interval)
+/// @return x0  pointer to pivot in the interval [x0, x1[
+_semi_random_pivot:
+    stp     x29, x30, [sp, -64]!
+    stp     x19, x20, [sp, 16]
+    stp     x21, x22, [sp, 32]
+
+    mov     x19, x0
+    mov     x20, x1
+
+    bl      _getsemirandom_64
+
+    mov     x2, x0
+    mov     x0, x19
+    mov     x1, x20
+    bl      _get_seeded_between // get a random position in [x0, x1[
+
+    lsr     x0, x0, 3           // make sure x0 is aligned
+    lsl     x0, x0, 3           // to 8 bytes
+
+    ldp     x21, x22, [sp, 32]
+    ldp     x19, x20, [sp, 16]
+    ldp     x29, x30, [sp], 64
+    ret
+
+.data
+    _semi_random_seed: .dword 0

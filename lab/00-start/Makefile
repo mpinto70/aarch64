@@ -7,6 +7,7 @@ PROGS = \
         04-bubble-sort.exe \
         05-quick-sort.exe \
         06-random.exe \
+        07-seed.exe \
 
 CPROGS = \
 		test-sort.exe \
