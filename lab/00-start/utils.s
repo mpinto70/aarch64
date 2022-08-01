@@ -11,6 +11,7 @@
 .global _strings_to_ints
 .global _getrandom
 .global _getrandom_between
+.global _swap_numbers
 
 .text
 /// calculate length of a null terminated string
@@ -327,4 +328,15 @@ _getrandom_between:
 
     ldp     x19, x20, [sp, 16]
     ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ret
+
+/// swap two numbers in memory
+/// @param x0   address of first
+/// @param x1   address of second
+/// @return NONE
+_swap_numbers:
+    ldr     x2, [x0]
+    ldr     x3, [x1]
+    str     x2, [x1]
+    str     x3, [x0]
     ret
