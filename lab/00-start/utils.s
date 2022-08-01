@@ -319,15 +319,27 @@ _getrandom_between:
     mov     x1, 8
     bl      _getrandom
 
-    ldr     x10, [sp, 32]
-    sub     x11, x20, x19       // interval
-    udiv    x12, x10, x11       // x12 = x10 / size
-    msub    x13, x12, x11, x10  // x13 = x10 % interval
-
-    add     x0, x19, x13
+    mov     x0, x19
+    mov     x1, x20
+    ldr     x2, [sp, 32]
+    bl      _get_seeded_between
 
     ldp     x19, x20, [sp, 16]
     ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ret
+
+
+// get the value in interval with seed
+// @param x0    min
+// @param x1    max
+// @param x2    seed
+// @return x0   the seeded number in [x0, x1[
+_get_seeded_between:
+    sub     x11, x1, x0         // interval
+    udiv    x12, x2, x11        // x12 = seed / interval
+    msub    x13, x12, x11, x2   // x13 = seed % interval
+
+    add     x0, x0, x13
     ret
 
 /// swap two numbers in memory

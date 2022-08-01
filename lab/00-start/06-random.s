@@ -17,7 +17,7 @@ _print_random:
     stp     x19, x20, [sp, 16]
 
     add     x19, sp, 32
-    mov     x20, 30                 // # of iterations
+    mov     x20, 100                 // # of iterations
     ._print_random.loop:
         cbz     x20, ._print_random.loop_end
         sub     x20, x20, 1
