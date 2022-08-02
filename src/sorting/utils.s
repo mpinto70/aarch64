@@ -1,5 +1,8 @@
 .global _getrandom
+.global _getrandom_64
+.global _getsemirandom_64
 .global _getrandom_between
+.global _get_seeded_between
 .global _swap_numbers
 
 .text
@@ -12,6 +15,61 @@ _getrandom:
     mov     x8, 278     // ssize_t getrandom(void *buf, size_t buflen, unsigned int flags)
     svc     0
     ret
+
+.text
+// Creates a random number of 64 bits
+// @return x0   the 64 bit random number
+_getrandom_64:
+    stp     x29, x30, [sp, -128]!
+
+    add     x0, sp, 32
+    mov     x1, 8
+    bl      _getrandom
+
+    ldr     x0, [sp, 32]
+
+    ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ret
+
+// Creates a semi random number of 64 bits
+// @return x0   the 64 bit random number
+_getsemirandom_64:
+    stp     x29, x30, [sp, -64]!
+    stp     x19, x20, [sp, 16]
+    stp     x21, x22, [sp, 32]
+
+    ldr     x19, =_getsemirandom_64_ror_cnt
+    ldr     x21, =_getsemirandom_64_seed
+
+    ldr     x20, [x19]
+    cbz     x20, ._getsemirandom_64.new_random
+    ldr     x22, [x21]
+    b       ._getsemirandom_64.finish
+
+    ._getsemirandom_64.new_random:
+    bl      _getrandom_64
+    mov     x22, x0
+    mov     x20, 64
+    b       ._getsemirandom_64.finish
+
+    ._getsemirandom_64.finish:
+    ror     x22, x22, 1
+    sub     x20, x20, 1
+    str     x22, [x21]
+    str     x20, [x19]
+
+    mov     x0, x22
+
+    ldp     x21, x22, [sp, 32]
+    ldp     x19, x20, [sp, 16]
+    ldp     x29, x30, [sp], 64
+    ret
+
+.data
+    _getsemirandom_64_ror_cnt: .dword 0
+    _getsemirandom_64_seed: .dword 0
+
+.text
 
 // generates random number between two numbers
 // @param x0    min
@@ -37,6 +95,19 @@ _getrandom_between:
 
     ldp     x19, x20, [sp, 16]
     ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ret
+
+// get the value in interval with seed
+// @param x0    min
+// @param x1    max
+// @param x2    seed
+// @return x0   the seeded number in [x0, x1[
+_get_seeded_between:
+    sub     x11, x1, x0         // interval
+    udiv    x12, x2, x11        // x12 = seed / interval
+    msub    x13, x12, x11, x2   // x13 = seed % interval
+
+    add     x0, x0, x13
     ret
 
 /// swap two numbers in memory
