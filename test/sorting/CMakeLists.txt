@@ -1,6 +1,7 @@
 set(sorting_srcs
-    quick_test.cpp
     bubble_test.cpp
+    quick_test.cpp
+    utils_test.cpp
 )
 
 set(sorting_libs

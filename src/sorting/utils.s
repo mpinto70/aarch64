@@ -6,6 +6,7 @@
 // generates random bytes
 // @param[out] x0   begin of buffer to receive the random bytes
 // @param x1        # of bytes in buffer
+// @return          the return of system call
 _getrandom:
     mov     x2, 0
     mov     x8, 278     // ssize_t getrandom(void *buf, size_t buflen, unsigned int flags)
