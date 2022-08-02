@@ -17,7 +17,7 @@ _do_build() {
     echo "Building ..."
     cmake ..
     _check "cmake"
-    make -j8
+    make
     _check "make"
     cd - || _check "cd back"
 }
