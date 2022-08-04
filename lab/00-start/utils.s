@@ -6,6 +6,7 @@
 .global _itos
 .global _stoi
 .global _break_line
+.global _space
 .global _print_ln
 .global _print_numbers
 .global _strings_to_ints
@@ -207,6 +208,23 @@ _break_line:    // no param
 .data
     ._break_line.new_line_txt:
         .ascii "\n"
+
+.text
+/// print a space
+/// @param NONE
+/// @return NONE
+_space:    // no param
+    mov     x0, STDOUT_FILENO
+    adr     x1, ._space.new_line_txt
+    mov     x2, 1
+    mov     x8, __NR_write
+    svc     0
+
+    ret
+
+.data
+    ._space.new_line_txt:
+        .ascii " "
 
 .text
 /// print a null terminated string with a line break at the end

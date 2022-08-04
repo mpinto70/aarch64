@@ -1,16 +1,16 @@
 
 PROGS = \
-        00-hello-world.exe \
-        01-hello-world.exe \
-        02-cmd-args.exe \
-        03-greater-of-two.exe \
-        04-bubble-sort.exe \
-        05-quick-sort.exe \
-        06-random.exe \
-        07-seed.exe \
+	00-hello-world.exe \
+	01-hello-world.exe \
+	02-cmd-args.exe \
+	03-greater-of-two.exe \
+	04-bubble-sort.exe \
+	05-quick-sort.exe \
+	06-random.exe \
+	07-seed.exe \
 
 CPROGS = \
-		test-sort.exe \
+	test-sort.exe \
 
 all: $(PROGS) $(CPROGS)
 
@@ -24,7 +24,8 @@ all: $(PROGS) $(CPROGS)
 
 clean:
 	rm -vf *.o \
-		$(PROGS)
+		$(PROGS) \
+		$(CPROGS)
 
 $(PROGS): %.exe: %.o utils.o sort.o
 	ld -o $@ $< utils.o sort.o

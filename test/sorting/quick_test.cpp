@@ -9,7 +9,8 @@
 
 namespace {
 
-constexpr size_t NUM_ELEMENTS = 1'000;
+constexpr size_t NUM_ELEMENTS = 100'000;
+pivot_f pivot_function = _random_pivot;
 
 TEST(quickTest, random) {
     std::vector<uint64_t> values(NUM_ELEMENTS, 0);
@@ -22,7 +23,7 @@ TEST(quickTest, random) {
 
     EXPECT_NE(verify, values);
 
-    _quick_sort(values.data(), values.data() + values.size());
+    _quick_sort(values.data(), values.data() + values.size(), pivot_function);
 
     EXPECT_EQ(verify, values);
 }
@@ -32,7 +33,7 @@ TEST(quickTest, ordered) {
     std::iota(values.begin(), values.end(), 0);
     const auto verify = values; // sorted
 
-    _quick_sort(values.data(), values.data() + values.size());
+    _quick_sort(values.data(), values.data() + values.size(), pivot_function);
 
     EXPECT_EQ(verify, values);
 }
@@ -45,7 +46,7 @@ TEST(quickTest, inverted) {
 
     EXPECT_NE(verify, values);
 
-    _quick_sort(values.data(), values.data() + values.size());
+    _quick_sort(values.data(), values.data() + values.size(), pivot_function);
 
     EXPECT_EQ(verify, values);
 }
@@ -54,7 +55,7 @@ TEST(quickTest, constant) {
     std::vector<uint64_t> values(NUM_ELEMENTS, 7);
     const auto verify = values;
 
-    _quick_sort(values.data(), values.data() + values.size());
+    _quick_sort(values.data(), values.data() + values.size(), pivot_function);
 
     EXPECT_EQ(verify, values);
 }
