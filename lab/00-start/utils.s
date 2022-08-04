@@ -13,6 +13,7 @@
 .global _getrandom_64
 .global _getsemirandom_64
 .global _getrandom_between
+.global _getsemirandom_between
 .global _get_seeded_between
 .global _swap_numbers
 
@@ -362,30 +363,57 @@ _getsemirandom_64:
     _getsemirandom_64_seed: .dword 0
 
 .text
-// generates random number between two numbers
+// generates random number between two numbers with parameterized generator
 // @param x0    min
 // @param x1    max
+// @param x2    generator function
 // @return x0   the random number in [x0, x1[
-_getrandom_between:
-    stp     x29, x30, [sp, -128]!
+_get_parameterized_random_between:
+    stp     x29, x30, [sp, -32]!
     stp     x19, x20, [sp, 16]
 
     mov     x19, x0
     mov     x20, x1
 
-    add     x0, sp, 32
-    mov     x1, 8
-    bl      _getrandom
+    blr     x2
 
-    mov     x0, x19
-    mov     x1, x20
-    ldr     x2, [sp, 32]
-    bl      _get_seeded_between
+    mov     x10, x0
+    sub     x11, x20, x19       // interval
+    udiv    x12, x10, x11       // x12 = x10 / size
+    msub    x13, x12, x11, x10  // x13 = x10 % interval
+
+    add     x0, x19, x13
 
     ldp     x19, x20, [sp, 16]
-    ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 32
     ret
 
+
+// generates random number between two numbers
+// @param x0    min
+// @param x1    max
+// @return x0   the random number in [x0, x1[
+_getrandom_between:
+    stp     x29, x30, [sp, -16]!
+
+    adr     x2, _getrandom_64
+    bl      _get_parameterized_random_between
+
+    ldp     x29, x30, [sp], 16
+    ret
+
+// generates a semi random number between two numbers
+// @param x0    min
+// @param x1    max
+// @return x0   the random number in [x0, x1[
+_getsemirandom_between:
+    stp     x29, x30, [sp, -16]!
+
+    adr     x2, _getsemirandom_64
+    bl      _get_parameterized_random_between
+
+    ldp     x29, x30, [sp], 16
+    ret
 
 // get the value in interval with seed
 // @param x0    min

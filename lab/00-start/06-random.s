@@ -83,7 +83,7 @@ _print_random:
 
         mov     x0, 16
         mov     x1, 256
-        bl      _semi_random_pivot
+        bl      _getsemirandom_between
         bl      _print_int
         bl      _break_line
         b       ._print_random.loop_2
