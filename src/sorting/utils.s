@@ -2,6 +2,7 @@
 .global _getrandom_64
 .global _getsemirandom_64
 .global _getrandom_between
+.global _getsemirandom_between
 .global _get_seeded_between
 .global _swap_numbers
 
@@ -82,11 +83,33 @@ _getrandom_between:
     mov     x19, x0
     mov     x20, x1
 
-    add     x0, sp, 32
-    mov     x1, 8
-    bl      _getrandom
+    bl      _getrandom_64
 
-    ldr     x10, [sp, 32]
+    mov     x10, x0
+    sub     x11, x20, x19       // interval
+    udiv    x12, x10, x11       // x12 = x10 / size
+    msub    x13, x12, x11, x10  // x13 = x10 % interval
+
+    add     x0, x19, x13
+
+    ldp     x19, x20, [sp, 16]
+    ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ret
+
+// generates a semi random number between two numbers
+// @param x0    min
+// @param x1    max
+// @return x0   the random number in [x0, x1[
+_getsemirandom_between:
+    stp     x29, x30, [sp, -128]!
+    stp     x19, x20, [sp, 16]
+
+    mov     x19, x0
+    mov     x20, x1
+
+    bl      _getsemirandom_64
+
+    mov     x10, x0
     sub     x11, x20, x19       // interval
     udiv    x12, x10, x11       // x12 = x10 / size
     msub    x13, x12, x11, x10  // x13 = x10 % interval

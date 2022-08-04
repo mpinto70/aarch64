@@ -37,12 +37,12 @@ TEST(utilsTest, getsemirandom_64) {
     }
 }
 
-void CheckGetRandomBetween(size_t MIN, size_t MAX) {
+void CheckGetRandomBetween(size_t MIN, size_t MAX, uint64_t (*random_func)(uint64_t, uint64_t)) {
     ASSERT_LT(MIN, MAX) << MIN << " / " << MAX;
     std::vector<uint64_t> values(MAX, 0);
     const size_t NUM = (MAX - MIN) * 1000;
     for (size_t i = 0; i < NUM; ++i) {
-        const auto value = _getrandom_between(MIN, MAX);
+        const auto value = random_func(MIN, MAX);
         ASSERT_GE(value, MIN) << i;
         ASSERT_LT(value, MAX) << i;
         ++values[value];
@@ -56,10 +56,17 @@ void CheckGetRandomBetween(size_t MIN, size_t MAX) {
 }
 
 TEST(utilsTest, getrandom_between) {
-    CheckGetRandomBetween(100, 157);
-    CheckGetRandomBetween(0, 12);
-    CheckGetRandomBetween(0, 1);
-    CheckGetRandomBetween(5, 6);
+    CheckGetRandomBetween(100, 157, _getrandom_between);
+    CheckGetRandomBetween(0, 12, _getrandom_between);
+    CheckGetRandomBetween(0, 1, _getrandom_between);
+    CheckGetRandomBetween(5, 6, _getrandom_between);
+}
+
+TEST(utilsTest, getsemirandom_between) {
+    CheckGetRandomBetween(100, 157, _getsemirandom_between);
+    CheckGetRandomBetween(0, 12, _getsemirandom_between);
+    CheckGetRandomBetween(0, 1, _getsemirandom_between);
+    CheckGetRandomBetween(5, 6, _getsemirandom_between);
 }
 
 TEST(utilsTest, get_seeded_between) {
