@@ -35,6 +35,7 @@ _start:
 
     mov     x0, sp
     add     x1, sp, x19, lsl 3
+    adr     x2, _left_pivot
     bl      _quick_sort
 
     mov     x0, sp
