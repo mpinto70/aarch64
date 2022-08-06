@@ -41,6 +41,31 @@ function(add_unit_test test_name sources_var libs_var)
     add_test(NAME ${unit_test_name} COMMAND ${unit_test_name})
 endfunction(add_unit_test)
 
+find_package(benchmark REQUIRED)
+
+function(add_benchmark_test test_name sources_var libs_var)
+    set(benchmark_test_name benchmark_${test_name})
+
+    add_executable(
+        ${benchmark_test_name}
+        ${${sources_var}}
+    )
+
+    set_target_properties(
+        ${benchmark_test_name}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test/bin
+    )
+
+    target_link_libraries(
+        ${benchmark_test_name}
+        PRIVATE ${${libs_var}}
+        PRIVATE benchmark::benchmark_main
+    )
+
+    add_test(NAME ${benchmark_test_name} COMMAND ${benchmark_test_name})
+endfunction(add_benchmark_test)
+
 function(_add_lib lib_name sources_var directory)
     add_library(
         ${lib_name}

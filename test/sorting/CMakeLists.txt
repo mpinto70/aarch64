@@ -13,3 +13,17 @@ add_unit_test(
     sorting_srcs
     sorting_libs
 )
+
+set(sorting_benchmark_srcs
+    quick_benchmark.cpp
+)
+
+set(sorting_benchmark_libs
+    sorting
+)
+
+add_benchmark_test(
+    sorting
+    sorting_benchmark_srcs
+    sorting_benchmark_libs
+)
