@@ -8,6 +8,7 @@ PROGS = \
 	05-quick-sort.exe \
 	06-random.exe \
 	07-seed.exe \
+	08-memory.exe \
 
 CPROGS = \
 	test-sort.exe \

@@ -330,7 +330,7 @@ _getrandom:
 // Creates a random number of 64 bits
 // @return x0   the 64 bit random number
 _getrandom_64:
-    stp     x29, x30, [sp, -128]!
+    stp     x29, x30, [sp, -16]!
 
     add     x0, sp, 32
     mov     x1, 8
@@ -338,7 +338,7 @@ _getrandom_64:
 
     ldr     x0, [sp, 32]
 
-    ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 16
     ret
 
 .text

@@ -21,7 +21,7 @@ _start:
     mov     x22, x1         // converted number
 
     mov     x0, x22
-    bl      _print_seeded
+    bl      _allocate_memory
     // exit success
     mov     x0, 0
     mov     x8, __NR_exit
@@ -50,31 +50,40 @@ _start:
         .asciz "Parameter not a number!\n"
 
 .text
-// @param x0    # of numbers to output
-_print_seeded:
+// @param x0    # of bytes to allocate
+_allocate_memory:
     stp     x29, x30, [sp, -128]!
     stp     x19, x20, [sp, 16]
     stp     x21, x22, [sp, 32]
 
-    mov     x21, x0
+    mov     x19, x0             // # of bytes
 
-    mov     x20, x21                // # of iterations
-    ._print_seeded.loop_2:
-        cbz     x20, ._print_seeded.loop_2_end
-        sub     x20, x20, 1
+    mov     x0, 0
+    mov     x8, __NR_brk
+    svc     0
 
-        mov     x0, 16
-        mov     x1, 256
-        mov     x2, x20
-        bl      _get_seeded_between
-        lsr     x0, x0, 3           // make sure x0 is aligned
-        lsl     x0, x0, 3           // to 8 bytes
-        bl      _print_int
-        bl      _break_line
-        b       ._print_seeded.loop_2
-    ._print_seeded.loop_2_end:
+    mov     x20, x0             // pointer to begin of brk
+
+    bl      _print_int
+    bl      _break_line
+
+    add     x0, x20, x19        // allocate x19 bytes
+    mov     x8, __NR_brk
+    svc     0
+
+    mov     x21, x0             // new end of brk
+
+    bl      _print_int
+    bl      _break_line
+
+    mov     x0, x20             // restore brk space to begin
+    mov     x8, __NR_brk
+    svc     0
+
+    bl      _print_int
+    bl      _break_line
 
     ldp     x19, x20, [sp, 16]
     ldp     x21, x22, [sp, 32]
-    ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 128
     ret
