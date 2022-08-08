@@ -16,7 +16,7 @@ _quick_sort:
     cmp     x10, x1
     b.ge    ._quick_sort.return     // at most 1 element
 
-    stp     x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
+    stp     x29, x30, [sp, -64]!
     stp     x19, x20, [sp, 16]
     stp     x21, x22, [sp, 32]
     stp     x23, x24, [sp, 48]
@@ -44,10 +44,10 @@ _quick_sort:
     bl      _quick_sort
     ._quick_sort.skip_right_sort:
 
-    ldp     x23, x24, [sp, 48]
-    ldp     x21, x22, [sp, 32]
     ldp     x19, x20, [sp, 16]
-    ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
+    ldp     x21, x22, [sp, 32]
+    ldp     x23, x24, [sp, 48]
+    ldp     x29, x30, [sp], 64
 
     ._quick_sort.return:
     ret
@@ -58,7 +58,7 @@ _quick_sort:
 /// @param x2   pivot function
 /// @return NONE
 _hoare_partition:
-    stp     x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
+    stp     x29, x30, [sp, -64]!
     stp     x19, x20, [sp, 16]
     stp     x21, x22, [sp, 32]
 
@@ -93,9 +93,9 @@ _hoare_partition:
     _hoare_partition.return:
     mov     x0, x20     // pivot position
 
-    ldp     x21, x22, [sp, 32]
     ldp     x19, x20, [sp, 16]
-    ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
+    ldp     x21, x22, [sp, 32]
+    ldp     x29, x30, [sp], 64
     ret
 
 /// Return the first element as the pivot

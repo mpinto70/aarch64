@@ -41,7 +41,7 @@ _strlen:
 /// @param x0 address of begin of string
 /// @return NONE
 _print_z:
-    stp     x29, x30, [sp, -32]!        // store x29, x30 (LR) on stack and reserve 32 bytes
+    stp     x29, x30, [sp, -32]!
     stp     x19, x20, [sp, 16]
 
     mov     x19, x0                     // save pointer to string
@@ -56,8 +56,7 @@ _print_z:
     svc     0
 
     ldp     x19, x20, [sp, 16]
-
-    ldp     x29, x30, [sp], 32          // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 32
     ret
 
 .text
@@ -65,10 +64,10 @@ _print_z:
 /// @param x0 the value to print
 /// @return NONE
 _print_int:
-    stp     x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
-    add     x29, sp, 0
-
+    stp     x29, x30, [sp, -64]!
     stp     x19, x20, [sp, 16]
+
+    add     x29, sp, 0
 
     add     x19, x29, 32    // pointer to buffer
     mov     x1, x19
@@ -84,8 +83,7 @@ _print_int:
     svc     0
 
     ldp     x19, x20, [sp, 16]
-
-    ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 64
     ret
 
 .text
@@ -96,9 +94,9 @@ _print_int:
 /// @return x0      0 success; 1 error
 ///         x1      number of chars written
 _itos:
-    stp     x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
-    add     x29, sp, 0
+    stp     x29, x30, [sp, -64]!
 
+    add     x29, sp, 0
     add     x15, x29, 64            // x15 is pointer to internal buffer (1 after the end of buffer)
     mov     x16, xzr                // x16 is the digit counter
 
@@ -108,7 +106,7 @@ _itos:
     mov     x11, 10                 // divisor
     ._itos.loop_convert:
         cmp     x16, x2
-        b.eq    ._itos.no_space      // not enough space in output buffer
+        b.eq    ._itos.no_space     // not enough space in output buffer
         sub     x15, x15, 1         // move one char back
         add     x16, x16, 1         // mark one more char
         udiv    x12, x0, x11        // x12 = x0 / 10
@@ -147,7 +145,7 @@ _itos:
         b       ._itos.loop_transfer
 
     ._itos.exit:
-    ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 64
     ret
 
 .text
@@ -231,12 +229,12 @@ _space:    // no param
 /// @param x0 address of begin of string
 /// @return NONE
 _print_ln:
-    stp     x29, x30, [sp, -16]!      // store x29, x30 (LR) on stack
+    stp     x29, x30, [sp, -16]!
 
     bl      _print_z
     bl      _break_line
 
-    ldp     x29, x30, [sp], 16       // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 16
     ret
 
 .text
@@ -246,9 +244,9 @@ _print_ln:
 /// @param x2   array of ints (with space for at least x1 elements)
 /// @return x0  0 - success / 1 - error
 _strings_to_ints:
-    stp     x29, x30, [sp, -32]!    // store x29, x30 (LR) on stack and reserve 32 bytes
-    stp     x19, x20, [sp, 16]      // sotre x19 and x20 to restore at the end
-    stp     x21, x22, [sp, 32]      // sotre x21 and x22 to restore at the end
+    stp     x29, x30, [sp, -48]!
+    stp     x19, x20, [sp, 16]
+    stp     x21, x22, [sp, 32]
 
     mov     x20, x0
     mov     x21, x1
@@ -279,10 +277,9 @@ _strings_to_ints:
     b       ._strings_to_ints.exit
 
     ._strings_to_ints.exit:
-    ldp     x21, x22, [sp, 32]
     ldp     x19, x20, [sp, 16]
-    ldp     x29, x30, [sp], 32      // restore x29, x30 (LR)
-
+    ldp     x21, x22, [sp, 32]
+    ldp     x29, x30, [sp], 48
     ret
 
 /// print an array of ints
@@ -290,8 +287,8 @@ _strings_to_ints:
 /// @param x1   # of elements
 /// @return NONE
 _print_numbers:
-    stp     x29, x30, [sp, -32]!    // store x29, x30 (LR) on stack and reserve 32 bytes
-    stp     x21, x22, [sp, 16]      // sotre x21 and x22 to restore at the end
+    stp     x29, x30, [sp, -32]!
+    stp     x21, x22, [sp, 16]
 
     mov     x21, x1
     mov     x22, x0
@@ -309,7 +306,7 @@ _print_numbers:
     bl      _break_line
 
     ldp     x21, x22, [sp, 16]
-    ldp     x29, x30, [sp], 32      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 32
     ret
 
 .data

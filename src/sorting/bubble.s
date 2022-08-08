@@ -7,10 +7,10 @@
 /// @param x1   end of array (one after last - open interval)
 /// @return NONE
 _bubble_sort:
-    stp     x29, x30, [sp, -64]!    // store x29, x30 (LR) on stack and reserve 32 bytes
-    stp     x19, x20, [sp, 16]      // sotre x19 and x20 to restore at the end
-    stp     x21, x22, [sp, 32]      // sotre x21 and x22 to restore at the end
-    stp     x23, x24, [sp, 48]      // sotre x23 and x24 to restore at the end
+    stp     x29, x30, [sp, -64]!
+    stp     x19, x20, [sp, 16]
+    stp     x21, x22, [sp, 32]
+    stp     x23, x24, [sp, 48]
 
     sub     x20, x1, x0             // # of elements times 8
     lsr     x20, x20, 3             // divided by 8
@@ -38,7 +38,7 @@ _bubble_sort:
     ldp     x23, x24, [sp, 48]
     ldp     x21, x22, [sp, 32]
     ldp     x19, x20, [sp, 16]
-    ldp     x29, x30, [sp], 64      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 64
 
     ret
 

@@ -76,5 +76,5 @@ _print_seeded:
 
     ldp     x19, x20, [sp, 16]
     ldp     x21, x22, [sp, 32]
-    ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ldp     x29, x30, [sp], 128
     ret
