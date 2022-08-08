@@ -66,6 +66,28 @@ function(add_benchmark_test test_name sources_var libs_var)
     add_test(NAME ${benchmark_test_name} COMMAND ${benchmark_test_name})
 endfunction(add_benchmark_test)
 
+function(add_asm_test test_name sources_var libs_var)
+    set(asm_test_name asm_${test_name})
+
+    add_executable(
+        ${asm_test_name}
+        ${${sources_var}}
+    )
+
+    set_target_properties(
+        ${asm_test_name}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test/bin
+    )
+
+    target_link_libraries(
+        ${asm_test_name}
+        PRIVATE ${${libs_var}}
+    )
+
+    add_test(NAME ${asm_test_name} COMMAND ${asm_test_name})
+endfunction(add_asm_test)
+
 function(_add_lib lib_name sources_var directory)
     add_library(
         ${lib_name}
