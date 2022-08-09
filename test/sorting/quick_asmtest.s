@@ -217,6 +217,43 @@ _print_hex:
     print_stderr
 .endm
 
+// print error message for validation (dirties x11 - x16)
+// @param x0    # of register (from x9)
+// @param x1    lhs value
+// @param x2    rhs value
+// @param x3    comparison error message
+// @param x4    comparison error message length
+print_error:
+    stp     x29, x30, [sp, -16]!
+    add     x11, sp, 16     // get address of old stack
+    mov     x12, x0
+    mov     x13, x1
+    mov     x14, x2
+    mov     x15, x3
+    mov     x16, x4
+    print_str           error_in_register, error_in_register_len
+    print_int           x12
+    print_str           separator, separator_len
+    print_int           x13
+    mov                 x1, x15
+    mov                 x2, x16
+    print_stderr
+    print_int           x14
+    print_str           error_location, error_location_len
+    ldr                 x14, [x11, 8]        // return address of caller x30
+    sub                 x14, x14, 4         // move to calling
+    ldr                 x13, [x11, 176]      // base address of calling function x18
+    sub                 x14, x14, x13
+    print_hex           x14
+    print_str           left_paren, left_paren_len
+    lsr                 x14, x14, 2
+    print_int           x14
+    print_str           right_paren, right_paren_len
+    print_ln
+
+    ldp     x29, x30, [sp], 16
+    ret
+
 // test that a function call preserves registers states
 // @param x0 - x7   params to function
 // @param x8        function to call
@@ -232,32 +269,19 @@ check_equal:
 
     mov     x9, 0
     .check_equal.loop_result:
-        cmp     x9, 8
-        b.eq    .check_equal.loop_result.end
+        cmp                 x9, 8
+        b.eq                .check_equal.loop_result.end
         is_reg_in_result    x9
-        cbz     x0, .check_equal.loop_result.next
+        cbz                 x0, .check_equal.loop_result.next
 
-        load_result         x10, x9
-        load_expected       x11, x9
-        cmp                 x10, x11
+        load_result         x1, x9
+        load_expected       x2, x9
+        cmp                 x1, x2
         b.eq                .check_equal.loop_result.next
-        print_str           error_in_register, error_in_register_len
-        print_int           x9
-        print_str           separator, separator_len
-        print_int           x10
-        print_str           eq_error, eq_error_len
-        print_int           x11
-        print_str           error_location, error_location_len
-        ldr                 x11, [sp, 8]        // return address of caller x30
-        sub                 x11, x11, 4         // move to calling
-        ldr                 x10, [sp, 176]      // base address of calling function x18
-        sub                 x11, x11, x10
-        print_hex           x11
-        print_str           left_paren, left_paren_len
-        lsr                 x11, x11, 2
-        print_int           x11
-        print_str           right_paren, right_paren_len
-        print_ln
+        mov                 x0, x9
+        ldr                 x3, =eq_error
+        ldr                 x4, =eq_error_len
+        bl                  print_error
 
         .check_equal.loop_result.next:
         add     x9, x9, 1
