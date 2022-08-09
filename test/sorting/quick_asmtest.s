@@ -22,7 +22,7 @@ main:
 // * registers x19-x28 are saved on top of the stack
 // * space is available to store the result (x0-x7) with save_result macro
 .macro prepare_frame
-    stp     x29, x30, [sp, -256]!
+    stp     x29, x30, [sp, -416]!
     // save registers that will be changed to check
     stp     x19, x20, [sp, 16]
     stp     x21, x22, [sp, 32]
@@ -45,7 +45,7 @@ main:
     ldp     x23, x24, [sp, 48]
     ldp     x25, x26, [sp, 64]
     ldp     x27, x28, [sp, 80]
-    ldp     x29, x30, [sp], 256
+    ldp     x29, x30, [sp], 416
 .endm
 
 // save results after calling function under test
@@ -56,6 +56,35 @@ main:
     stp     x6, x7, [sp, 240]
 .endm
 
+// fills registers x19 to x28 with strange values and save them
+.macro save_x19_to_x28_random
+    mov     x19, 0x7fffffffffffffff
+    ror     x20, x19, 7
+    ror     x21, x20, 7
+    ror     x22, x21, 7
+    ror     x23, x22, 7
+    ror     x24, x23, 7
+    ror     x25, x24, 7
+    ror     x26, x25, 7
+    ror     x27, x26, 7
+    ror     x28, x27, 7
+
+    stp     x19, x20, [sp, 256]
+    stp     x21, x22, [sp, 272]
+    stp     x23, x24, [sp, 288]
+    stp     x25, x26, [sp, 304]
+    stp     x27, x28, [sp, 320]
+.endm
+
+// save x19 to x28 after calling FUT
+.macro save_x19_to_x28_result
+    stp     x19, x20, [sp, 336]
+    stp     x21, x22, [sp, 352]
+    stp     x23, x24, [sp, 368]
+    stp     x25, x26, [sp, 384]
+    stp     x27, x28, [sp, 400]
+.endm
+
 // check if a register \imm has expectation on result (0<= imm <= 7)
 .macro is_reg_in_result imm
     ldr     x1, [sp, 104]       // load value of x9 saved value
@@ -63,18 +92,32 @@ main:
     and     x0, x0, 1
 .endm
 
-// load result for \xM in xN
+// load result for \xM in \xN
 .macro load_result xN, xM
     mov     \xN, 192                // begin of saved results
     add     \xN, \xN, \xM, lsl 3
-    ldr     \xN, [sp, \xN]          // load saved result to x0
+    ldr     \xN, [sp, \xN]          // load saved result to xN
 .endm
 
-// load expected result for \imm in x1
+// load expected result for \xM in \xN
 .macro load_expected xN, xM
     mov     \xN, 112                // begin of expected results
     add     \xN, \xN, \xM, lsl 3
-    ldr     \xN, [sp, \xN]          // load expected result to x1
+    ldr     \xN, [sp, \xN]          // load expected result to xN
+.endm
+
+// load result for \xM in \xN
+.macro load_reg_result xN, xM
+    mov     \xN, 336                // begin of saved reg results
+    add     \xN, \xN, \xM, lsl 3
+    ldr     \xN, [sp, \xN]          // load saved reg result to xN
+.endm
+
+// load expected result for \xM in \xN
+.macro load_reg_expected xN, xM
+    mov     \xN, 256                // begin of expected reg results
+    add     \xN, \xN, \xM, lsl 3
+    ldr     \xN, [sp, \xN]          // load expected result to xN
 .endm
 
 .macro print_stderr
@@ -254,6 +297,43 @@ print_error:
     ldp     x29, x30, [sp], 16
     ret
 
+// print error message for validation (dirties x11 - x16)
+// @param x0    # of register (from x9)
+// @param x1    lhs value
+// @param x2    rhs value
+// @param x3    comparison error message
+// @param x4    comparison error message length
+print_hex_error:
+    stp     x29, x30, [sp, -16]!
+    add     x11, sp, 16     // get address of old stack
+    mov     x12, x0
+    mov     x13, x1
+    mov     x14, x2
+    mov     x15, x3
+    mov     x16, x4
+    print_str           error_in_register, error_in_register_len
+    print_int           x12
+    print_str           separator, separator_len
+    print_hex           x13
+    mov                 x1, x15
+    mov                 x2, x16
+    print_stderr
+    print_hex           x14
+    print_str           error_location, error_location_len
+    ldr                 x14, [x11, 8]        // return address of caller x30
+    sub                 x14, x14, 4         // move to calling
+    ldr                 x13, [x11, 176]      // base address of calling function x18
+    sub                 x14, x14, x13
+    print_hex           x14
+    print_str           left_paren, left_paren_len
+    lsr                 x14, x14, 2
+    print_int           x14
+    print_str           right_paren, right_paren_len
+    print_ln
+
+    ldp     x29, x30, [sp], 16
+    ret
+
 // test that a function call preserves registers states
 // @param x0 - x7   params to function
 // @param x8        function to call
@@ -263,9 +343,29 @@ print_error:
 check_equal:
     prepare_frame
 
+    save_x19_to_x28_random
     blr     x8                  // function under test
-
     save_result
+    save_x19_to_x28_result
+
+    mov     x9, 0
+    .check_equal.loop_registers:
+        cmp                 x9, 10
+        b.eq                .check_equal.loop_registers.end
+
+        load_reg_result     x1, x9
+        load_reg_expected   x2, x9
+        cmp                 x1, x2
+        b.eq                .check_equal.loop_registers.next
+        add                 x0, x9, 19
+        ldr                 x3, =eq_error
+        ldr                 x4, =eq_error_len
+        bl                  print_hex_error
+
+        .check_equal.loop_registers.next:
+        add     x9, x9, 1
+        b .check_equal.loop_registers
+    .check_equal.loop_registers.end:
 
     mov     x9, 0
     .check_equal.loop_result:
