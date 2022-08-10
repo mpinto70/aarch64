@@ -5,15 +5,43 @@
 main:
     stp     x29, x30, [sp, -16]!
 
-    mov     x0, 0xff0000000
+    bl      dirty_x0_x18        // put random values in registers
+    mov     x0, 0xff0000000     // parameters to FUT
     mov     x1, 0xff8000000
-    ldr     x8, =_right_pivot
-    ldr     x18, =main
-    mov     x9, 1
-    mov     x10, 0xffc000000
-    bl      check_equal
+    ldr     x8, =_right_pivot   // FUT
+    ldr     x18, =main          // base address for error messages
+    mov     x9, 0x1             // active result registers only x0
+    sub     x10, x1, 16         // expected value for x0
+    bl      check_call
 
     mov     x0, 0
+    ldp     x29, x30, [sp], 16
+    ret
+
+// fills registers x0 to x8 with strange values
+dirty_x0_x18:
+    stp     x29, x30, [sp, -16]!
+
+    bl      _getrandom_64
+    ror     x1, x0, 3
+    ror     x2, x1, 3
+    ror     x3, x2, 3
+    ror     x4, x3, 3
+    ror     x5, x4, 3
+    ror     x6, x5, 3
+    ror     x7, x6, 3
+    ror     x8, x7, 3
+    ror     x9, x8, 3
+    ror     x10, x9, 3
+    ror     x11, x10, 3
+    ror     x12, x11, 3
+    ror     x13, x12, 3
+    ror     x14, x13, 3
+    ror     x15, x14, 3
+    ror     x16, x15, 3
+    ror     x17, x16, 3
+    ror     x18, x17, 3
+
     ldp     x29, x30, [sp], 16
     ret
 
@@ -340,7 +368,7 @@ print_hex_error:
 // @param x9        bit mask for results set (bits 0-7)
 // @param x10 - x17 expected results
 // @param x18       base address
-check_equal:
+check_call:
     prepare_frame
 
     save_x19_to_x28_random
@@ -349,44 +377,44 @@ check_equal:
     save_x19_to_x28_result
 
     mov     x9, 0
-    .check_equal.loop_registers:
+    .check_call.loop_registers:
         cmp                 x9, 10
-        b.eq                .check_equal.loop_registers.end
+        b.eq                .check_call.loop_registers.end
 
         load_reg_result     x1, x9
         load_reg_expected   x2, x9
         cmp                 x1, x2
-        b.eq                .check_equal.loop_registers.next
+        b.eq                .check_call.loop_registers.next
         add                 x0, x9, 19
         ldr                 x3, =eq_error
         ldr                 x4, =eq_error_len
         bl                  print_hex_error
 
-        .check_equal.loop_registers.next:
+        .check_call.loop_registers.next:
         add     x9, x9, 1
-        b .check_equal.loop_registers
-    .check_equal.loop_registers.end:
+        b .check_call.loop_registers
+    .check_call.loop_registers.end:
 
     mov     x9, 0
-    .check_equal.loop_result:
+    .check_call.loop_result:
         cmp                 x9, 8
-        b.eq                .check_equal.loop_result.end
+        b.eq                .check_call.loop_result.end
         is_reg_in_result    x9
-        cbz                 x0, .check_equal.loop_result.next
+        cbz                 x0, .check_call.loop_result.next
 
         load_result         x1, x9
         load_expected       x2, x9
         cmp                 x1, x2
-        b.eq                .check_equal.loop_result.next
+        b.eq                .check_call.loop_result.next
         mov                 x0, x9
         ldr                 x3, =eq_error
         ldr                 x4, =eq_error_len
         bl                  print_error
 
-        .check_equal.loop_result.next:
+        .check_call.loop_result.next:
         add     x9, x9, 1
-        b .check_equal.loop_result
-    .check_equal.loop_result.end:
+        b .check_call.loop_result
+    .check_call.loop_result.end:
 
     restore_frame
     ret
