@@ -362,6 +362,52 @@ print_hex_error:
     ldp     x29, x30, [sp], 16
     ret
 
+// check that callee registers are preserved (x19-x28)
+.macro check_callee_registers
+    mov     x9, 0
+    .check_callee_registers.loop_registers:
+        cmp                 x9, 10
+        b.eq                .check_callee_registers.loop_registers.end
+
+        load_reg_result     x1, x9
+        load_reg_expected   x2, x9
+        cmp                 x1, x2
+        b.eq                .check_callee_registers.loop_registers.next
+        add                 x0, x9, 19
+        ldr                 x3, =eq_error
+        ldr                 x4, =eq_error_len
+        bl                  print_hex_error
+
+        .check_callee_registers.loop_registers.next:
+        add     x9, x9, 1
+        b .check_callee_registers.loop_registers
+    .check_callee_registers.loop_registers.end:
+.endm
+
+// check that callee registers are preserved (x19-x28)
+.macro check_call_results
+    mov     x9, 0
+    .check_call_results.loop_result:
+        cmp                 x9, 8
+        b.eq                .check_call_results.loop_result.end
+        is_reg_in_result    x9
+        cbz                 x0, .check_call_results.loop_result.next
+
+        load_result         x1, x9
+        load_expected       x2, x9
+        cmp                 x1, x2
+        b.eq                .check_call_results.loop_result.next
+        mov                 x0, x9
+        ldr                 x3, =eq_error
+        ldr                 x4, =eq_error_len
+        bl                  print_error
+
+        .check_call_results.loop_result.next:
+        add     x9, x9, 1
+        b .check_call_results.loop_result
+    .check_call_results.loop_result.end:
+.endm
+
 // test that a function call preserves registers states
 // @param x0 - x7   params to function
 // @param x8        function to call
@@ -376,45 +422,9 @@ check_call:
     save_result
     save_x19_to_x28_result
 
-    mov     x9, 0
-    .check_call.loop_registers:
-        cmp                 x9, 10
-        b.eq                .check_call.loop_registers.end
+    check_callee_registers
 
-        load_reg_result     x1, x9
-        load_reg_expected   x2, x9
-        cmp                 x1, x2
-        b.eq                .check_call.loop_registers.next
-        add                 x0, x9, 19
-        ldr                 x3, =eq_error
-        ldr                 x4, =eq_error_len
-        bl                  print_hex_error
-
-        .check_call.loop_registers.next:
-        add     x9, x9, 1
-        b .check_call.loop_registers
-    .check_call.loop_registers.end:
-
-    mov     x9, 0
-    .check_call.loop_result:
-        cmp                 x9, 8
-        b.eq                .check_call.loop_result.end
-        is_reg_in_result    x9
-        cbz                 x0, .check_call.loop_result.next
-
-        load_result         x1, x9
-        load_expected       x2, x9
-        cmp                 x1, x2
-        b.eq                .check_call.loop_result.next
-        mov                 x0, x9
-        ldr                 x3, =eq_error
-        ldr                 x4, =eq_error_len
-        bl                  print_error
-
-        .check_call.loop_result.next:
-        add     x9, x9, 1
-        b .check_call.loop_result
-    .check_call.loop_result.end:
+    check_call_results
 
     restore_frame
     ret
