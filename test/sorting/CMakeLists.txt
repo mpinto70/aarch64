@@ -34,6 +34,7 @@ set(sorting_asm_srcs
 
 set(sorting_asm_libs
     sorting
+    asm_framework
 )
 
 add_asm_test(
