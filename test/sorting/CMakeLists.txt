@@ -27,3 +27,18 @@ add_benchmark_test(
     sorting_benchmark_srcs
     sorting_benchmark_libs
 )
+
+set(sorting_asm_srcs
+    quick_asmtest.s
+)
+
+set(sorting_asm_libs
+    sorting
+    asm_framework
+)
+
+add_asm_test(
+    sorting
+    sorting_asm_srcs
+    sorting_asm_libs
+)
