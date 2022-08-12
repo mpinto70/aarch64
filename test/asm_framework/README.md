@@ -22,14 +22,6 @@ Check functions return the number of errors detected in `x0` (so `0` means succe
 
 ## Implementation
 
-<style>
-tr:nth-child(n+3):nth-child(-n+12)  { background-color: #fce2c5!important; }
-tr:nth-child(n+15):nth-child(-n+22) { background-color: #e3f5e1!important; }
-tr:nth-child(n+25):nth-child(-n+32) { background-color: #f6e1e8!important; }
-tr:nth-child(n+33):nth-child(-n+42) { background-color: #ffe396!important; }
-tr:nth-child(n+43):nth-child(-n+52) { background-color: #f3e1e4!important; }
-</style>
-
 All registers are saved in the stack upon entry in check functions (size is 416):
 
 | offset | value | item                                                  |
