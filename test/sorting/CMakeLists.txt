@@ -29,7 +29,9 @@ add_benchmark_test(
 )
 
 set(sorting_asm_srcs
+    driver_asmtests.s
     quick_asmtest.s
+    utils_asmtest.s
 )
 
 set(sorting_asm_libs
