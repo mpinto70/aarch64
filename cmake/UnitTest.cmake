@@ -62,16 +62,40 @@ function(add_benchmark_test test_name sources_var libs_var)
         PRIVATE ${${libs_var}}
         PRIVATE benchmark::benchmark_main
     )
-
-    add_test(NAME ${benchmark_test_name} COMMAND ${benchmark_test_name})
 endfunction(add_benchmark_test)
 
 function(add_asm_test test_name sources_var libs_var)
-    set(asm_test_name asm_${test_name})
+    set(asm_test_name aut_${test_name})
+    set(parser "${CMAKE_SOURCE_DIR}/tools/app/autf/parser.py")
+
+    # https://crascit.com/2017/04/18/generated-sources-in-cmake-builds/
+    set(sources_out "")
+    set(sources_in_full "")
+    foreach(source_in ${${sources_var}})
+        string(REPLACE ".in" "" source_out "${source_in}")
+        add_custom_command(
+            OUTPUT ${source_out}
+            COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/${source_out} && python ${parser} test
+                -i ${CMAKE_CURRENT_SOURCE_DIR}/${source_in}
+                -o ${CMAKE_CURRENT_BINARY_DIR}/${source_out}
+            DEPENDS ${source_in}
+        )
+        list(APPEND sources_out ${source_out})
+        list(APPEND sources_in_full ${CMAKE_CURRENT_SOURCE_DIR}/${source_in})
+    endforeach(source_in)
+
+    add_custom_command(
+        OUTPUT autf_driver.s
+        COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/autf_driver.s && python ${parser} driver
+            -i ${sources_in_full}
+            -o ${CMAKE_CURRENT_BINARY_DIR}/autf_driver.s
+        DEPENDS ${sources_out}
+    )
 
     add_executable(
         ${asm_test_name}
-        ${${sources_var}}
+        autf_driver.s
+        ${sources_out}
     )
 
     set_target_properties(
