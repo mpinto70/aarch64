@@ -1,6 +1,6 @@
 # ASM unit test framework
 
-Here is my atempt to create a unit test framework.
+Here is my attempt to create a unit test framework.
 
 In order to test a function (function under test, FUT), registers should be populated as:
 
@@ -10,7 +10,7 @@ In order to test a function (function under test, FUT), registers should be popu
   function is supposed to interact with C, it only return one result in `x0` or none at all);
 * `x10` to `x17`: expected returned values from FUT;
 * `x19`: base address of unit test (to report errors);
-* `x20`: address of a null terminated string with unit test name (to resport errors).
+* `x20`: address of a null terminated string with unit test name (to report errors).
 
 Note that, since `x19` and `x20` are used, unit test function should push them to the stack and
 restore them before returning.
