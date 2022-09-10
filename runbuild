@@ -10,16 +10,12 @@ _check() {
 }
 
 _do_build() {
-    if [[ ! -d "build" ]]; then
-        mkdir ${SCRIPT_DIR}/build
-    fi
-    cd ${SCRIPT_DIR}/build || _check "cd to build"
+    echo "Configuring ..."
+    cmake -B build
+    _check "configuring"
     echo "Building ..."
-    cmake ..
-    _check "cmake"
-    make
-    _check "make"
-    cd - || _check "cd back"
+    cmake --build build -j4
+    _check "build"
 }
 
 _clean() {
@@ -29,11 +25,6 @@ _clean() {
         external \
 
     cd - || _check "cd back"
-}
-
-_demo() {
-    echo "Put your demo here"
-    ${SCRIPT_DIR}/bin/exe
 }
 
 if [[ "$#" = "0" ]]; then
@@ -55,7 +46,7 @@ elif [[ "$1" = "asm" ]]; then
     _do_build
     shift
     echo "Testing... "
-    for asm in "${SCRIPT_DIR}"/build/test/bin/asm_*
+    for asm in "${SCRIPT_DIR}"/build/test/bin/aut_*
     do
         $asm "$@"
         _check "$asm"
@@ -72,17 +63,11 @@ elif [[ "$1" = "benchmark" ]]; then
 elif [[ "$1" = "ctest" ]]; then
     shift
     _do_build
-    cd ${SCRIPT_DIR}/build || _check "cd to build"
-    ctest "$@"
+    cmake --build build -- test
     _check "ctest"
-    cd - || _check "cd back"
 elif [[ "$1" = "demo" ]]; then
     _do_build
     _demo
-elif [[ "$1" = "check" ]]; then
-    _do_build
-    cd ${SCRIPT_DIR}/build || _check "cd to build"
-    make cppcheck
 else
-    echo "Usage: `basename $0` [unit|asm|benchmark|ctest|clean|demo|check]"
+    echo "Usage: `basename $0` [unit|asm|benchmark|ctest|clean]"
 fi

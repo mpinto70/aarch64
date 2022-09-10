@@ -1,7 +1,7 @@
 # Adventures in ARM assembly 64 bit
 
-Just some musings in ARM assembly. I run and test this project in a Raspberry Pi
-400 and a Raspberry Pi 3 B+ running Raspberry Pi OS (64-bit).
+Just some musings in ARM assembly. I run and test this project in a Raspberry Pi 400 and a Raspberry
+Pi 3 B+ running Raspberry Pi OS (64-bit).
 
 ## Building and testing
 
@@ -14,7 +14,13 @@ To build:
 To test (and also build):
 
 ```shell
-./runbuild test
+./runbuild ctest
+```
+
+To run the benchmarks (and also build):
+
+```shell
+./runbuild benchmark
 ```
 
 ## Dependencies
