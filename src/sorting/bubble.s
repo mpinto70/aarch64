@@ -1,4 +1,5 @@
 .global _bubble_sort
+.global _sort_two
 
 .text
 
