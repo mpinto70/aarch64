@@ -29,7 +29,9 @@ add_benchmark_test(
 )
 
 set(sorting_asm_srcs
-    quick_asmtest.s
+    bubble_asmtest.in.s
+    quick_asmtest.in.s
+    utils_asmtest.in.s
 )
 
 set(sorting_asm_libs

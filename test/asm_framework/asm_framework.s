@@ -1,9 +1,17 @@
 .text
 
+// fills registers x0 to x18 with strange values
 .global dirty_x0_x18
+// test that a function call preserves registers states
+// @param x0 - x7   params to function
+// @param x8        function to call
+// @param x9        bit mask for results set (bits 0-7)
+// @param x10 - x17 expected results
+// @param x18       base address of test
+// @param x19       address of a null terminated string with test name
 .global check_call
 
-// fills registers x0 to x8 with strange values
+// fills registers x0 to x18 with strange values
 dirty_x0_x18:
     stp     x29, x30, [sp, -16]!
 
@@ -459,7 +467,7 @@ buffer_len = . - buffer
 line_break:
     .ascii      "\n"
 error_in_register:
-    .ascii      "Error found in register x"
+    .ascii      "\nError found in register x"
 error_in_register_len = . - error_in_register
 separator_in:
     .ascii      " ==> "
