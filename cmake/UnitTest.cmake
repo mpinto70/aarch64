@@ -66,7 +66,7 @@ endfunction(add_benchmark_test)
 
 function(add_asm_test test_name sources_var libs_var)
     set(asm_test_name aut_${test_name})
-    set(parser "${CMAKE_SOURCE_DIR}/tools/app/autf/parser.py")
+    set(parser "${AUTF_PATH}/parser.py")
 
     # https://crascit.com/2017/04/18/generated-sources-in-cmake-builds/
     set(sources_out "")
