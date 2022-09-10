@@ -467,7 +467,7 @@ buffer_len = . - buffer
 line_break:
     .ascii      "\n"
 error_in_register:
-    .ascii      "Error found in register x"
+    .ascii      "\nError found in register x"
 error_in_register_len = . - error_in_register
 separator_in:
     .ascii      " ==> "
