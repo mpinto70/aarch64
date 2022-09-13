@@ -12,6 +12,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(AUTF_PATH "${CMAKE_SOURCE_DIR}/tools/autf")
+
 set(CMAKE_CXX_FLAGS " \
     -Wno-parentheses \
     -Werror \
@@ -41,4 +43,5 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/UnitTest.cmake)
 
 # Recurse subdirectories
 add_subdirectory(src)
+add_subdirectory(${AUTF_PATH})
 add_subdirectory(test)

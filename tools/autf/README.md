@@ -1,4 +1,4 @@
-# ASM unit test framework
+# ASM unit test framework (AUTF)
 
 Here is my attempt to create a unit test framework.
 
@@ -19,6 +19,63 @@ There is a helper function `dirty_x0_x18` that should be used before calling che
 avoid spurious values.
 
 Check functions return the number of errors detected in `x0` (so `0` means success).
+
+## Parser
+
+In order to simplify test scaffolding, I created a [script](parser.py) that preprocesses test files,
+and create the test driver. There are two ways of calling the parser.
+
+1. To parse each test file
+
+```bash
+python <path/to/parser>/parser.py test \
+    -i <path/to/test>/test_source.1.in.s \
+    -o <path/to/out/test>/test_source.1.s
+python <path/to/parser>/parser.py test \
+    -i <path/to/test>/test_source.2.in.s \
+    -o <path/to/out/test>/test_source.2.s
+...
+```
+
+2. To create the test driver
+
+```bash
+python <path/to/parser>/parser.py driver \
+    -i <path/to/test>/test_source.1.in.s \
+    <path/to/test>/test_source.2.in.s \
+    <path/to/test>/test_source.3.in.s \
+    -o <path/to/out/test>/autf_driver.s
+```
+
+### Test instrumentation
+
+The parser looks for specific text markers and the test name should have a predefined form. An
+example is worth 1 million words:
+
+```asm
+.text   // the test should be in the .text section
+
+test._right_pivot.ok:   // the name of the test has to have the form:
+                        // test.<name of the FUT>.<complement>
+                        // In this example, the function being tested is `_right_pivot`
+                        // And the complement of the test is `ok`
+    stp     x29, x30, [sp, -32]!        // it is always necessary to save the x29, x30 (stack frame)
+    stp     x19, x20, [sp, 16]          // and x19 and x20 that are used to save unit test address and test name
+
+    bl      dirty_x0_x18                // put random values in registers (recommended to do)
+    mov     x0, 0xff00                  // x0 to x7 are the parameters to FUT, in this example:
+    mov     x1, 0xff80                  // x0 has begin of array and x1 has end of array
+    ldr     x8, =FUNCTION_UNDER_TEST    // [verbatim] parsed to FUT
+    ldr     x19, =UNIT_TEST_ADDRESS     // [verbatim] parsed to address of this unit test, for error messages
+    ldr     x20, =UNIT_TEST_NAME        // [verbatim] parsed to name of this unit test, for error messages
+    mov     x9, 0x1                     // bit mask specifying which registers will have return values (in this example only x0)
+    sub     x10, x1, 16                 // x10 to x17 the expected return values (in this example 16 in x0)
+    bl      check_call                  // [verbatim] call the function to run the tests
+
+    ldp     x19, x20, [sp, 16]          // restore the stack frame
+    ldp     x29, x30, [sp], 32
+    ret                                 // and return
+```
 
 ## Implementation
 
