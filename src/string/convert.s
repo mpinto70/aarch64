@@ -22,12 +22,12 @@ _str_to_uint64:
         cbz     x16, ._str_to_uint64.return // no more data
         mov     x11, xzr
         ldrb    w11, [x15]                  // get digit from buffer
-        cmp     x11, 0x30                   // verify that it is a digit
+        cmp     x11, '0'                    // verify that it is a digit
         b.lt    ._str_to_uint64.error       // not a digit
-        cmp     x11, 0x39                   // verify that it is a digit
+        cmp     x11, '9'                    // verify that it is a digit
         b.gt    ._str_to_uint64.error       // not a digit
-        sub     x11, x11, 0x30              // convert digit to int
-        mul     x18, x18, x12               // x18 *= 10 + x11
+        sub     x11, x11, '0'               // convert digit to int
+        mul     x18, x18, x12               // x18 = x18*10 + x11
         add     x18, x18, x11
         sub     x16, x16, 1                 // consume size
         add     x15, x15, 1                 // advance pointer
