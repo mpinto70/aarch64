@@ -22,14 +22,32 @@ const char* _strz_to_uint64(const char* str, uint64_t* out);
  * @param val       the value to be converted
  * @param[out] out  a pointer to a buffer that will receive the string
  * @param out_len   space available in output buffer
- * @return number of characters converted (0 means value does not fit in buffer)
+ * @return number of characters converted
+ * @return 0 if value does not fit in buffer
  */
 uint64_t _uint64_to_str(uint64_t val, char* out, uint64_t out_len);
 /** Convert the value to a hex string
  * @param val       the value to be converted
  * @param[out] out  a pointer to a buffer that will receive the string
  * @param out_len   space available in output buffer
- * @return number of characters converted (0 means value does not fit in buffer)
+ * @return number of characters converted
+ * @return 0 if value does not fit in buffer
  */
 uint64_t _uint64_to_hex(uint64_t val, char* out, uint64_t out_len);
+/** Convert the value to a null terminated string
+ * @param val       the value to be converted
+ * @param[out] out  a pointer to a buffer that will receive the string
+ * @param out_len   space available in output buffer
+ * @return number of characters converted (not including the null terminator)
+ * @return 0 if value does not fit in buffer
+ */
+uint64_t _uint64_to_strz(uint64_t val, char* out, uint64_t out_len);
+/** Convert the value to a null terminated hex string
+ * @param val       the value to be converted
+ * @param[out] out  a pointer to a buffer that will receive the string
+ * @param out_len   space available in output buffer
+ * @return number of characters converted (not including the null terminator)
+ * @return 0 if value does not fit in buffer
+ */
+uint64_t _uint64_to_hexz(uint64_t val, char* out, uint64_t out_len);
 }
