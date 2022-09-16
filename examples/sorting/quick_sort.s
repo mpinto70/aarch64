@@ -7,6 +7,8 @@ main:
     stp     x19, x20, [sp, 16]
     stp     x21, x22, [sp, 32]
 
+    mov     x21, xzr        // no stack allocation yet
+
     // print command line arguments
     mov     x19, x0         // # of command line paramters
     cmp     X19, 2          // at least two parameters
@@ -73,7 +75,13 @@ main:
 
 .data
     wrong_num_params:
-        .asciz "Invalid number of parameters!\n"
+        .ascii "Invalid number of parameters!\n"
+        .ascii "\n"
+        .ascii "Prints numbers sorted\n"
+        .ascii "\n"
+        .ascii "quick_sort <num> [<num> ...]\n"
+        .ascii "\n"
+        .asciz ""
     error_not_number:
         .asciz "Parameter not a number!\n"
 
