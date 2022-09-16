@@ -36,6 +36,9 @@ main:
     mov     x1, x19
     bl      ._print_numbers
 
+    adr     x0, separator
+    bl      _print_out_z
+
     mov     x0, sp
     add     x1, sp, x19, lsl 3
     adr     x2, _middle_pivot
@@ -72,8 +75,9 @@ main:
     ldp     x29, x30, [sp], 48
     ret
 
-
 .data
+    separator:
+        .asciz "----------------------------------------\n"
     wrong_num_params:
         .ascii "Invalid number of parameters!\n"
         .ascii "\n"
