@@ -2,6 +2,8 @@
 .global _strz_to_uint64
 .global _uint64_to_str
 .global _uint64_to_hex
+.global _uint64_to_strz
+.global _uint64_to_hexz
 
 .text
 /// convert a string to an int
@@ -195,4 +197,76 @@ _uint64_to_hex:
 
     ._uint64_to_hex.exit:
     ldp     x29, x30, [sp], 64
+    ret
+
+.text
+/// convert a uint64 to a null terminated string
+/// @param x0       the value to convert
+/// @param[out] x1  output buffer address
+/// @param x2       buffer size
+/// @return x0      number of chars written except the null terminator (0 means there was no space in buffer)
+_uint64_to_strz:
+    stp     x29, x30, [sp, -32]!
+    stp     x19, x20, [sp, 16]
+
+    cbz     x2, ._uint64_to_strz.no_space
+
+    sub     x2, x2, 1           // reserve space for the null
+
+    mov     x19, x0             // save x0
+    mov     x20, x1             //     and x1
+
+    bl      _uint64_to_str
+
+    cbz     x0, ._uint64_to_strz.exit
+
+    add     x10, x20, x0
+    mov     w11, wzr
+    strb    w11, [x10]          // put null terminator in buffer
+
+    b       ._uint64_to_strz.exit
+
+    ._uint64_to_strz.no_space:
+    mov     x0, 0
+    b       ._uint64_to_strz.exit
+
+    ._uint64_to_strz.exit:
+    ldp     x19, x20, [sp, 16]
+    ldp     x29, x30, [sp], 32
+    ret
+
+.text
+/// convert a uint64 to a null terminated hex string
+/// @param x0       the value to convert
+/// @param[out] x1  output buffer address
+/// @param x2       buffer size
+/// @return x0      number of chars written except the null terminator (0 means there was no space in buffer)
+_uint64_to_hexz:
+    stp     x29, x30, [sp, -32]!
+    stp     x19, x20, [sp, 16]
+
+    cbz     x2, ._uint64_to_hexz.no_space
+
+    sub     x2, x2, 1           // reserve space for the null
+
+    mov     x19, x0             // save x0
+    mov     x20, x1             //     and x1
+
+    bl      _uint64_to_hex
+
+    cbz     x0, ._uint64_to_hexz.exit
+
+    add     x10, x20, x0
+    mov     w11, wzr
+    strb    w11, [x10]          // put null terminator in buffer
+
+    b       ._uint64_to_hexz.exit
+
+    ._uint64_to_hexz.no_space:
+    mov     x0, 0
+    b       ._uint64_to_hexz.exit
+
+    ._uint64_to_hexz.exit:
+    ldp     x19, x20, [sp, 16]
+    ldp     x29, x30, [sp], 32
     ret

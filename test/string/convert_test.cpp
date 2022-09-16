@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <string>
 
 namespace {
@@ -100,6 +101,60 @@ TEST(convertTest, uint64_to_hex_error) {
     EXPECT_EQ(_uint64_to_hex(0x12345, value, 4), 0);
 
     EXPECT_EQ(_uint64_to_hex(0x12345, value, 5), 5);
+    EXPECT_EQ(std::string("12345"), value);
+}
+
+TEST(convertTest, uint64_to_strz_ok) {
+    char value[50] = {};
+    std::fill_n(value, 50, 0xff);
+    EXPECT_EQ(_uint64_to_strz(12345, value, sizeof(value)), 5);
+    EXPECT_EQ(std::string("12345"), value);
+    EXPECT_EQ(value[5], '\0');
+    EXPECT_EQ(value[6], 0xff);
+    EXPECT_EQ(_uint64_to_strz(987654321, value, sizeof(value)), 9);
+    EXPECT_EQ(std::string("987654321"), value);
+    EXPECT_EQ(value[9], '\0');
+    EXPECT_EQ(value[10], 0xff);
+}
+
+TEST(convertTest, uint64_to_strz_error) {
+    char value[50] = {};
+    std::fill_n(value, 50, 0xff);
+    EXPECT_EQ(_uint64_to_strz(12345, value, 0), 0);
+    EXPECT_EQ(_uint64_to_strz(12345, value, 1), 0);
+    EXPECT_EQ(_uint64_to_strz(12345, value, 2), 0);
+    EXPECT_EQ(_uint64_to_strz(12345, value, 3), 0);
+    EXPECT_EQ(_uint64_to_strz(12345, value, 4), 0);
+    EXPECT_EQ(_uint64_to_strz(12345, value, 5), 0); // no space for the null terminator
+
+    EXPECT_EQ(_uint64_to_strz(12345, value, 6), 5);
+    EXPECT_EQ(std::string("12345"), value);
+}
+
+TEST(convertTest, uint64_to_hexz_ok) {
+    char value[50] = {};
+    std::fill_n(value, 50, 0xff);
+    EXPECT_EQ(_uint64_to_hexz(0x12345, value, sizeof(value)), 5);
+    EXPECT_EQ(std::string("12345"), value);
+    EXPECT_EQ(value[5], '\0');
+    EXPECT_EQ(value[6], 0xff);
+    EXPECT_EQ(_uint64_to_hexz(0xabcdef9876543210, value, sizeof(value)), 16);
+    EXPECT_EQ(std::string("abcdef9876543210"), value);
+    EXPECT_EQ(value[16], '\0');
+    EXPECT_EQ(value[17], 0xff);
+}
+
+TEST(convertTest, uint64_to_hexz_error) {
+    char value[50] = {};
+    std::fill_n(value, 50, 0xff);
+    EXPECT_EQ(_uint64_to_hexz(0x12345, value, 0), 0);
+    EXPECT_EQ(_uint64_to_hexz(0x12345, value, 1), 0);
+    EXPECT_EQ(_uint64_to_hexz(0x12345, value, 2), 0);
+    EXPECT_EQ(_uint64_to_hexz(0x12345, value, 3), 0);
+    EXPECT_EQ(_uint64_to_hexz(0x12345, value, 4), 0);
+    EXPECT_EQ(_uint64_to_hexz(0x12345, value, 5), 0); // no space for null terminator
+
+    EXPECT_EQ(_uint64_to_hexz(0x12345, value, 6), 5);
     EXPECT_EQ(std::string("12345"), value);
 }
 
