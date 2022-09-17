@@ -62,6 +62,34 @@ TEST(convertTest, strz_to_uint64_error) {
     EXPECT_EQ(result, 0); // does not change
 }
 
+TEST(convertTest, strz_to_uint64s_ok) {
+    uint64_t ints[10] = {};
+    const char* strs[] = {
+        "01234", "11234", "21234", "31234", "41234", "51234", "61234", "71234", "81234", "91234",
+    };
+
+    EXPECT_EQ(_strsz_to_uint64s(strs, 10, ints), nullptr);
+    EXPECT_EQ(ints[0], 1234);
+    EXPECT_EQ(ints[1], 11234);
+    EXPECT_EQ(ints[2], 21234);
+    EXPECT_EQ(ints[3], 31234);
+    EXPECT_EQ(ints[4], 41234);
+    EXPECT_EQ(ints[5], 51234);
+    EXPECT_EQ(ints[6], 61234);
+    EXPECT_EQ(ints[7], 71234);
+    EXPECT_EQ(ints[8], 81234);
+    EXPECT_EQ(ints[9], 91234);
+}
+
+TEST(convertTest, strz_to_uint64s_erro) {
+    uint64_t ints[5] = {};
+    const char* strs[] = {
+        "01234", "11234", "21a34", "31234", "41234",
+    };
+
+    EXPECT_EQ(_strsz_to_uint64s(strs, 5, ints), strs[2]);
+}
+
 TEST(convertTest, uint64_to_str_ok) {
     char value[50] = {};
     EXPECT_EQ(_uint64_to_str(12345, value, sizeof(value)), 5);
