@@ -97,7 +97,6 @@ _get_parameterized_random_between:
     ldp     x29, x30, [sp], 32
     ret
 
-
 // generates random number between two numbers
 // @param x0    min
 // @param x1    max

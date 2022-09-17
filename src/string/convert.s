@@ -1,5 +1,6 @@
 .global _str_to_uint64
 .global _strz_to_uint64
+.global _strsz_to_uint64s
 .global _uint64_to_str
 .global _uint64_to_hex
 .global _uint64_to_strz
@@ -68,6 +69,47 @@ _strz_to_uint64:
 
     ldp     x19, x20, [sp, 16]
     ldp     x29, x30, [sp], 32
+    ret
+
+.text
+/// convert an array of null terminated strings into an array of ints
+/// @param x0   array of pointer to strings
+/// @param x1   # of elements
+/// @param x2   array of ints (with space for at least x1 elements)
+/// @return x0  0 - success / address of ofending string
+_strsz_to_uint64s:
+    stp     x29, x30, [sp, -48]!
+    stp     x19, x20, [sp, 16]
+    stp     x21, x22, [sp, 32]
+
+    mov     x20, x0     // begin of array of strings (will be incremented)
+    mov     x21, x1     // # of strings (will be decremented)
+    mov     x22, x2     // begin array of ints (will be incremented)
+    ._strsz_to_uint64s.loop_strs:
+        cbz     x21, ._strsz_to_uint64s.loop_strs_end
+        // convert current arq
+        ldr     x0, [x20]
+        mov     x1, x22
+        bl      _strz_to_uint64
+        cbnz    x0, ._strsz_to_uint64s.param_not_number
+
+        add     x22, x22, 8     // next number
+        add     x20, x20, 8     // next str
+        sub     x21, x21, 1     // one less str
+        b       ._strsz_to_uint64s.loop_strs
+    ._strsz_to_uint64s.loop_strs_end:
+
+    mov     x0, xzr
+    b ._strsz_to_uint64s.exit
+    // error processing
+    ._strsz_to_uint64s.param_not_number:
+    ldr     x0, [x20]           // ofending string
+    b       ._strsz_to_uint64s.exit
+
+    ._strsz_to_uint64s.exit:
+    ldp     x19, x20, [sp, 16]
+    ldp     x21, x22, [sp, 32]
+    ldp     x29, x30, [sp], 48
     ret
 
 .text

@@ -126,6 +126,7 @@ _brk_ln_err:
 
     ldp     x29, x30, [sp], 16
     ret
+
 .data
     ._line_break:
         .ascii      "\n"

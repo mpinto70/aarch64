@@ -70,7 +70,6 @@ _start:
     mov     x8, __NR_exit
     svc     0
 
-
 .data
     wrong_num_params:
         .asciz "Invalid number of parameters!\n"

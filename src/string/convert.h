@@ -18,6 +18,14 @@ const char* _str_to_uint64(const char* str, uint64_t len, uint64_t* out);
  * @return pointer to first char that is not a digit
  */
 const char* _strz_to_uint64(const char* str, uint64_t* out);
+/** Convert an array of null terminated strings to array of integers
+ * @param strs      the strings
+ * @param len       number of strings
+ * @param[out] out  a pointer to begin of an array of at least \b len elements
+ * @return nullptr if successful
+ * @return pointer to first str that is not a number
+ */
+const char* _strsz_to_uint64s(const char** strs, uint64_t len, uint64_t* out);
 /** Convert the value to a string
  * @param val       the value to be converted
  * @param[out] out  a pointer to a buffer that will receive the string
