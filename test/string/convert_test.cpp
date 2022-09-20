@@ -29,8 +29,53 @@ TEST(convertTest, str_to_uint64_error) {
     for (const char c : invalid) {
         for (size_t i = 0; i < 6; ++i) {
             std::string str = "12345";
+            EXPECT_EQ(_str_to_uint64(str.c_str(), str.size(), &result), nullptr) << str;
+            EXPECT_EQ(result, 12345);
+            result = 0;
             str.insert(i, 1, c);
             EXPECT_EQ(_str_to_uint64(str.c_str(), str.size(), &result), &str[i]) << str;
+            EXPECT_EQ(result, 0); // does not change
+        }
+    }
+}
+
+TEST(convertTest, hex_to_uint64_ok) {
+    const char number[] = "12345abCD";
+    uint64_t result = 0;
+
+    EXPECT_EQ(_hex_to_uint64(number, 1, &result), nullptr);
+    EXPECT_EQ(result, 0x1);
+    EXPECT_EQ(_hex_to_uint64(number, 2, &result), nullptr);
+    EXPECT_EQ(result, 0x12);
+    EXPECT_EQ(_hex_to_uint64(number, 3, &result), nullptr);
+    EXPECT_EQ(result, 0x123);
+    EXPECT_EQ(_hex_to_uint64(number, 4, &result), nullptr);
+    EXPECT_EQ(result, 0x1234);
+    EXPECT_EQ(_hex_to_uint64(number, 5, &result), nullptr);
+    EXPECT_EQ(result, 0x12345);
+    EXPECT_EQ(_hex_to_uint64(number, 6, &result), nullptr);
+    EXPECT_EQ(result, 0x12345a);
+    EXPECT_EQ(_hex_to_uint64(number, 7, &result), nullptr);
+    EXPECT_EQ(result, 0x12345ab);
+    EXPECT_EQ(_hex_to_uint64(number, 8, &result), nullptr);
+    EXPECT_EQ(result, 0x12345abc);
+    EXPECT_EQ(_hex_to_uint64(number, 9, &result), nullptr);
+    EXPECT_EQ(result, 0x12345abcd);
+}
+
+TEST(convertTest, hex_to_uint64_error) {
+    uint64_t result = 0;
+    const std::vector<char> invalid = { 'g', 'G', 'H', 'x', '.', ' ' };
+    for (const char c : invalid) {
+        for (size_t i = 0; i < 6; ++i) {
+            std::string str = "12aBc";
+            SCOPED_TRACE(std::to_string(i) + " of " + str);
+            EXPECT_EQ(_hex_to_uint64(str.c_str(), str.size(), &result), nullptr);
+            EXPECT_EQ(result, 0x12abc);
+            result = 0;
+            str.insert(i, 1, c);
+            EXPECT_EQ(_hex_to_uint64(str.c_str(), str.size(), &result), &str[i]) << str;
+            EXPECT_EQ(result, 0); // does not change
         }
     }
 
@@ -54,15 +99,58 @@ TEST(convertTest, strz_to_uint64_error) {
     for (const char c : invalid) {
         for (size_t i = 0; i < 6; ++i) {
             std::string str = "12345";
+            SCOPED_TRACE(std::to_string(i) + " of " + str);
+            EXPECT_EQ(_strz_to_uint64(str.c_str(), &result), nullptr);
+            EXPECT_EQ(result, 12345);
+            result = 0;
             str.insert(i, 1, c);
             EXPECT_EQ(_strz_to_uint64(str.c_str(), &result), &str[i]) << str;
+            EXPECT_EQ(result, 0); // does not change
         }
     }
-
-    EXPECT_EQ(result, 0); // does not change
 }
 
-TEST(convertTest, strz_to_uint64s_ok) {
+TEST(convertTest, hexz_to_uint64_ok) {
+    uint64_t result = 0;
+
+    EXPECT_EQ(_hexz_to_uint64("1", &result), nullptr);
+    EXPECT_EQ(result, 0x1);
+    EXPECT_EQ(_hexz_to_uint64("12", &result), nullptr);
+    EXPECT_EQ(result, 0x12);
+    EXPECT_EQ(_hexz_to_uint64("123", &result), nullptr);
+    EXPECT_EQ(result, 0x123);
+    EXPECT_EQ(_hexz_to_uint64("1234", &result), nullptr);
+    EXPECT_EQ(result, 0x1234);
+    EXPECT_EQ(_hexz_to_uint64("12345", &result), nullptr);
+    EXPECT_EQ(result, 0x12345);
+    EXPECT_EQ(_hexz_to_uint64("12345a", &result), nullptr);
+    EXPECT_EQ(result, 0x12345a);
+    EXPECT_EQ(_hexz_to_uint64("12345AB", &result), nullptr);
+    EXPECT_EQ(result, 0x12345ab);
+    EXPECT_EQ(_hexz_to_uint64("12345abc", &result), nullptr);
+    EXPECT_EQ(result, 0x12345abc);
+    EXPECT_EQ(_hexz_to_uint64("12345ABCD", &result), nullptr);
+    EXPECT_EQ(result, 0x12345abcd);
+}
+
+TEST(convertTest, hexz_to_uint64_error) {
+    uint64_t result = 0;
+    const std::vector<char> invalid = { 'G', 'g', 'H', 'x', '.', ' ' };
+    for (const char c : invalid) {
+        for (size_t i = 0; i < 6; ++i) {
+            std::string str = "12abc";
+            SCOPED_TRACE(std::to_string(i) + " of " + str);
+            EXPECT_EQ(_hexz_to_uint64(str.c_str(), &result), nullptr);
+            EXPECT_EQ(result, 0x12abc);
+            result = 0;
+            str.insert(i, 1, c);
+            EXPECT_EQ(_hexz_to_uint64(str.c_str(), &result), &str[i]) << str;
+            EXPECT_EQ(result, 0); // does not change
+        }
+    }
+}
+
+TEST(convertTest, strsz_to_uint64s_ok) {
     uint64_t ints[10] = {};
     const char* strs[] = {
         "01234", "11234", "21234", "31234", "41234", "51234", "61234", "71234", "81234", "91234",
@@ -81,7 +169,7 @@ TEST(convertTest, strz_to_uint64s_ok) {
     EXPECT_EQ(ints[9], 91234);
 }
 
-TEST(convertTest, strz_to_uint64s_erro) {
+TEST(convertTest, strsz_to_uint64s_erro) {
     uint64_t ints[5] = {};
     const char* strs[] = {
         "01234", "11234", "21a34", "31234", "41234",

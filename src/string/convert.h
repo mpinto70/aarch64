@@ -11,6 +11,14 @@ extern "C" {
  * @return pointer to first char that is not a digit
  */
 const char* _str_to_uint64(const char* str, uint64_t len, uint64_t* out);
+/** Convert the number that is expressed in the hex string \b hex of length \b len
+ * @param hex       the hex string
+ * @param len       the length of the input hex string
+ * @param[out] out  a pointer to a uint64_t to receive the value converted
+ * @return nullptr if successful
+ * @return pointer to first char that is not a digit
+ */
+const char* _hex_to_uint64(const char* hex, uint64_t len, uint64_t* out);
 /** Convert the number that is expressed in the null terminated string \b str
  * @param str       the string
  * @param[out] out  a pointer to a uint64_t to receive the value converted
@@ -18,6 +26,13 @@ const char* _str_to_uint64(const char* str, uint64_t len, uint64_t* out);
  * @return pointer to first char that is not a digit
  */
 const char* _strz_to_uint64(const char* str, uint64_t* out);
+/** Convert the number that is expressed in the null terminated hex string \b hex
+ * @param hex       the hex string
+ * @param[out] out  a pointer to a uint64_t to receive the value converted
+ * @return nullptr if successful
+ * @return pointer to first char that is not a digit
+ */
+const char* _hexz_to_uint64(const char* hex, uint64_t* out);
 /** Convert an array of null terminated strings to array of integers
  * @param strs      the strings
  * @param len       number of strings
