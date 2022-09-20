@@ -1,6 +1,10 @@
 .global _str_to_uint64
+.global _hex_to_uint64
 .global _strz_to_uint64
+.global _hexz_to_uint64
+
 .global _strsz_to_uint64s
+
 .global _uint64_to_str
 .global _uint64_to_hex
 .global _uint64_to_strz
@@ -48,6 +52,96 @@ _str_to_uint64:
     ret
 
 .text
+/// convert a character to its hex value
+/// @return x0 0 on success and 1 on error
+/// @return x1 the value (on success)
+._convert_hex_digit:
+    cmp     x0, '0'
+    b.lt    ._convert_hex_digit.not_decimal
+    cmp     x0, '9'
+    b.gt    ._convert_hex_digit.not_decimal
+
+    sub     x1, x0, '0'
+    mov     x0, xzr
+    b       ._convert_hex_digit.exit
+
+    ._convert_hex_digit.not_decimal:
+    cmp     x0, 'a'
+    b.lt    ._convert_hex_digit.not_lower
+    cmp     x0, 'f'
+    b.gt    ._convert_hex_digit.not_lower
+
+    sub     x1, x0, 'a'
+    add     x1, x1, 10
+    mov     x0, xzr
+    b       ._convert_hex_digit.exit
+
+    ._convert_hex_digit.not_lower:
+    cmp     x0, 'A'
+    b.lt    ._convert_hex_digit.not_hex_digit
+    cmp     x0, 'F'
+    b.gt    ._convert_hex_digit.not_hex_digit
+
+    sub     x1, x0, 'A'
+    add     x1, x1, 10
+    mov     x0, xzr
+    b       ._convert_hex_digit.exit
+
+    ._convert_hex_digit.not_hex_digit:
+    mov     x0, 1
+
+    ._convert_hex_digit.exit:
+    ret
+
+.text
+/// convert a hex string to an int
+/// @param x0       buffer with hex text
+/// @param x1       buffer size
+/// @param[out] x2  address of output paramter
+/// @return x0      0 success (nullptr)
+/// @return x0      address of first offending char in the hex string
+_hex_to_uint64:
+    stp     x29, x30, [sp, -48]!
+    stp     x19, x20, [sp, 16]
+    stp     x21, x22, [sp, 32]
+
+    mov     x19, x0     // x19 points to buffer
+    mov     x20, x1     // x20 has buffer size
+    mov     x21, x2     // output address
+    mov     x22, xzr    // acumulator for value
+
+    // number is converted from left to right
+    ._hex_to_uint64.loop_convert:
+        cbz     x20, ._hex_to_uint64.return // no more data
+        mov     x0, xzr
+        ldrb    w0, [x19]                   // get hex digit from buffer
+
+        bl      ._convert_hex_digit
+
+        cbnz    x0, ._hex_to_uint64.error
+        mov     x11, x1
+
+        lsl     x22, x22, 4                 // one digit shift
+        add     x22, x22, x11               // add current digit
+        sub     x20, x20, 1                 // consume size
+        add     x19, x19, 1                 // advance pointer
+        b       ._hex_to_uint64.loop_convert
+
+    ._hex_to_uint64.return:
+    mov     x0, xzr             // sucess
+    str     x22, [x21]          // converted value
+    b       ._hex_to_uint64.exit
+
+    ._hex_to_uint64.error:
+    mov     x0, x19             // pointer to offending char
+
+    ._hex_to_uint64.exit:
+    ldp     x19, x20, [sp, 16]
+    ldp     x21, x22, [sp, 32]
+    ldp     x29, x30, [sp], 48
+    ret
+
+.text
 /// convert a null terminated string to an int
 /// @param x0       buffer with integer text
 /// @param[out] x1  address of output paramter
@@ -69,6 +163,51 @@ _strz_to_uint64:
 
     ldp     x19, x20, [sp, 16]
     ldp     x29, x30, [sp], 32
+    ret
+
+.text
+/// convert a null terminated hex string to an int
+/// @param x0       buffer with hex text
+/// @param[out] x1  address of output paramter
+/// @return x0      0 success (nullptr)
+/// @return x0      address of first offending char in the hex string
+_hexz_to_uint64:
+    stp     x29, x30, [sp, -48]!
+    stp     x19, x20, [sp, 16]
+    stp     x21, x22, [sp, 32]
+
+    mov     x19, x0     // x19 points to buffer
+    mov     x21, x1     // output address
+    mov     x22, xzr    // acumulator for value
+
+    // number is converted from left to right
+    ._hexz_to_uint64.loop_convert:
+        mov     x0, xzr
+        ldrb    w0, [x19]                   // get hex digit from buffer
+        cbz     x0, ._hexz_to_uint64.return // no more data
+
+        bl      ._convert_hex_digit
+
+        cbnz    x0, ._hexz_to_uint64.error
+        mov     x11, x1
+
+        lsl     x22, x22, 4                 // one digit shift
+        add     x22, x22, x11               // add current digit
+        add     x19, x19, 1                 // advance pointer
+        b       ._hexz_to_uint64.loop_convert
+
+    ._hexz_to_uint64.return:
+    mov     x0, xzr             // sucess
+    str     x22, [x21]          // converted value
+    b       ._hexz_to_uint64.exit
+
+    ._hexz_to_uint64.error:
+    mov     x0, x19             // pointer to offending char
+
+    ._hexz_to_uint64.exit:
+    ldp     x19, x20, [sp, 16]
+    ldp     x21, x22, [sp, 32]
+    ldp     x29, x30, [sp], 48
     ret
 
 .text
