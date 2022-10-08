@@ -91,6 +91,8 @@ TEST(convertTest, strz_to_uint64_ok) {
     EXPECT_EQ(result, 12);
     EXPECT_EQ(_strz_to_uint64("123", &result), nullptr);
     EXPECT_EQ(result, 123);
+    EXPECT_EQ(_strz_to_uint64("1234567890", &result), nullptr);
+    EXPECT_EQ(result, 1234567890);
 }
 
 TEST(convertTest, strz_to_uint64_error) {
@@ -131,6 +133,12 @@ TEST(convertTest, hexz_to_uint64_ok) {
     EXPECT_EQ(result, 0x12345abc);
     EXPECT_EQ(_hexz_to_uint64("12345ABCD", &result), nullptr);
     EXPECT_EQ(result, 0x12345abcd);
+    EXPECT_EQ(_hexz_to_uint64("1234567890", &result), nullptr);
+    EXPECT_EQ(result, 0x1234567890);
+    EXPECT_EQ(_hexz_to_uint64("abcdef", &result), nullptr);
+    EXPECT_EQ(result, 0xabcdef);
+    EXPECT_EQ(_hexz_to_uint64("ABCDEF", &result), nullptr);
+    EXPECT_EQ(result, 0xabcdef);
 }
 
 TEST(convertTest, hexz_to_uint64_error) {

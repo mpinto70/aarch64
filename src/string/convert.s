@@ -66,23 +66,13 @@ _str_to_uint64:
     b       ._convert_hex_digit.exit
 
     ._convert_hex_digit.not_decimal:
+    orr     x0, x0, 0x20    // convert to lower case
     cmp     x0, 'a'
-    b.lt    ._convert_hex_digit.not_lower
-    cmp     x0, 'f'
-    b.gt    ._convert_hex_digit.not_lower
-
-    sub     x1, x0, 'a'
-    add     x1, x1, 10
-    mov     x0, xzr
-    b       ._convert_hex_digit.exit
-
-    ._convert_hex_digit.not_lower:
-    cmp     x0, 'A'
     b.lt    ._convert_hex_digit.not_hex_digit
-    cmp     x0, 'F'
+    cmp     x0, 'f'
     b.gt    ._convert_hex_digit.not_hex_digit
 
-    sub     x1, x0, 'A'
+    sub     x1, x0, 'a'
     add     x1, x1, 10
     mov     x0, xzr
     b       ._convert_hex_digit.exit
