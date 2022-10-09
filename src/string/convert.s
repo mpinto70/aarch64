@@ -31,11 +31,9 @@ _str_to_uint64:
         cbz     x16, ._str_to_uint64.return // no more data
         mov     x11, xzr
         ldrb    w11, [x15]                  // get digit from buffer
-        cmp     x11, '0'                    // verify that it is a digit
-        b.lt    ._str_to_uint64.error       // not a digit
-        cmp     x11, '9'                    // verify that it is a digit
-        b.gt    ._str_to_uint64.error       // not a digit
-        sub     x11, x11, '0'               // convert digit to int
+        sub     x11, x11, '0'
+        cmp     x11, 10                     // verify that it is a digit
+        b.hs    ._str_to_uint64.error       // not a digit
         mul     x18, x18, x12               // x18 = x18*10 + x11
         add     x18, x18, x11
         sub     x16, x16, 1                 // consume size
@@ -58,32 +56,27 @@ _str_to_uint64:
 /// @return x0 0 on success and 1 on error
 /// @return x1 the value (on success)
 _convert_hex_digit:
-    cmp     x0, '0'
-    b.lt    ._convert_hex_digit.not_decimal
-    cmp     x0, '9'
-    b.gt    ._convert_hex_digit.not_decimal
-
     sub     x1, x0, '0'
+    cmp     x1, 10
+    b.hs    ._convert_hex_digit.not_decimal
+
     mov     x0, xzr
-    b       ._convert_hex_digit.exit
+    ret
 
     ._convert_hex_digit.not_decimal:
     orr     x0, x0, 0x20    // convert to lower case
-    cmp     x0, 'a'
-    b.lt    ._convert_hex_digit.not_hex_digit
-    cmp     x0, 'f'
-    b.gt    ._convert_hex_digit.not_hex_digit
-
     sub     x1, x0, 'a'
+    cmp     x1, 6
+    b.hs    ._convert_hex_digit.not_hex_digit
+
     add     x1, x1, 10
     mov     x0, xzr
-    b       ._convert_hex_digit.exit
+    ret
 
     ._convert_hex_digit.not_hex_digit:
     mov     x0, 1
-
-    ._convert_hex_digit.exit:
     ret
+
 
 .text
 /// convert a hex string to an int
