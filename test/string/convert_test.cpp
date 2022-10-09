@@ -29,11 +29,13 @@ TEST(convertTest, str_to_uint64_error) {
     for (const char c : invalid) {
         for (size_t i = 0; i < 6; ++i) {
             std::string str = "12345";
-            EXPECT_EQ(_str_to_uint64(str.c_str(), str.size(), &result), nullptr) << str;
+            EXPECT_EQ(_str_to_uint64(str.c_str(), str.size(), &result), nullptr)
+                  << '[' << str << ']';
             EXPECT_EQ(result, 12345);
             result = 0;
             str.insert(i, 1, c);
-            EXPECT_EQ(_str_to_uint64(str.c_str(), str.size(), &result), &str[i]) << str;
+            EXPECT_EQ(_str_to_uint64(str.c_str(), str.size(), &result), &str[i])
+                  << '[' << str << ']';
             EXPECT_EQ(result, 0); // does not change
         }
     }
@@ -69,13 +71,14 @@ TEST(convertTest, hex_to_uint64_error) {
     for (const char c : invalid) {
         for (size_t i = 0; i < 6; ++i) {
             std::string str = "12aBc";
-            SCOPED_TRACE(std::to_string(i) + " of " + str);
-            EXPECT_EQ(_hex_to_uint64(str.c_str(), str.size(), &result), nullptr);
-            EXPECT_EQ(result, 0x12abc);
+            EXPECT_EQ(_hex_to_uint64(str.c_str(), str.size(), &result), nullptr)
+                  << '[' << str << ']';
+            EXPECT_EQ(result, 0x12abc) << '[' << str << ']';
             result = 0;
             str.insert(i, 1, c);
-            EXPECT_EQ(_hex_to_uint64(str.c_str(), str.size(), &result), &str[i]) << str;
-            EXPECT_EQ(result, 0); // does not change
+            EXPECT_EQ(_hex_to_uint64(str.c_str(), str.size(), &result), &str[i])
+                  << '[' << str << ']';
+            EXPECT_EQ(result, 0) << '[' << str << ']'; // does not change
         }
     }
 
@@ -101,13 +104,12 @@ TEST(convertTest, strz_to_uint64_error) {
     for (const char c : invalid) {
         for (size_t i = 0; i < 6; ++i) {
             std::string str = "12345";
-            SCOPED_TRACE(std::to_string(i) + " of " + str);
-            EXPECT_EQ(_strz_to_uint64(str.c_str(), &result), nullptr);
-            EXPECT_EQ(result, 12345);
+            EXPECT_EQ(_strz_to_uint64(str.c_str(), &result), nullptr) << '[' << str << ']';
+            EXPECT_EQ(result, 12345) << '[' << str << ']';
             result = 0;
             str.insert(i, 1, c);
-            EXPECT_EQ(_strz_to_uint64(str.c_str(), &result), &str[i]) << str;
-            EXPECT_EQ(result, 0); // does not change
+            EXPECT_EQ(_strz_to_uint64(str.c_str(), &result), &str[i]) << '[' << str << ']';
+            EXPECT_EQ(result, 0) << '[' << str << ']'; // does not change
         }
     }
 }
@@ -147,13 +149,12 @@ TEST(convertTest, hexz_to_uint64_error) {
     for (const char c : invalid) {
         for (size_t i = 0; i < 6; ++i) {
             std::string str = "12abc";
-            SCOPED_TRACE(std::to_string(i) + " of " + str);
-            EXPECT_EQ(_hexz_to_uint64(str.c_str(), &result), nullptr);
-            EXPECT_EQ(result, 0x12abc);
+            EXPECT_EQ(_hexz_to_uint64(str.c_str(), &result), nullptr) << '[' << str << ']';
+            EXPECT_EQ(result, 0x12abc) << '[' << str << ']';
             result = 0;
             str.insert(i, 1, c);
-            EXPECT_EQ(_hexz_to_uint64(str.c_str(), &result), &str[i]) << str;
-            EXPECT_EQ(result, 0); // does not change
+            EXPECT_EQ(_hexz_to_uint64(str.c_str(), &result), &str[i]) << '[' << str << ']';
+            EXPECT_EQ(result, 0) << '[' << str << ']'; // does not change
         }
     }
 }
