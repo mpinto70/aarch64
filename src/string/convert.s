@@ -77,7 +77,6 @@ _convert_hex_digit:
     mov     x0, 1
     ret
 
-
 .text
 /// convert a hex string to an int
 /// @param x0       buffer with hex text
