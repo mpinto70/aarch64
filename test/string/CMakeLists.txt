@@ -27,3 +27,19 @@ add_benchmark_test(
     string_benchmark_srcs
     string_benchmark_libs
 )
+
+set(string_asm_srcs
+    convert_asmtest.in.s
+)
+
+set(string_asm_libs
+    string
+    sorting
+    asm_framework
+)
+
+add_asm_test(
+    string
+    string_asm_srcs
+    string_asm_libs
+)

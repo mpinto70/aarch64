@@ -10,6 +10,8 @@
 .global _uint64_to_strz
 .global _uint64_to_hexz
 
+.global _convert_hex_digit
+
 .text
 /// convert a string to an int
 /// @param x0       buffer with integer text
@@ -55,7 +57,7 @@ _str_to_uint64:
 /// convert a character to its hex value
 /// @return x0 0 on success and 1 on error
 /// @return x1 the value (on success)
-._convert_hex_digit:
+_convert_hex_digit:
     cmp     x0, '0'
     b.lt    ._convert_hex_digit.not_decimal
     cmp     x0, '9'
@@ -106,7 +108,7 @@ _hex_to_uint64:
         mov     x0, xzr
         ldrb    w0, [x19]                   // get hex digit from buffer
 
-        bl      ._convert_hex_digit
+        bl      _convert_hex_digit
 
         cbnz    x0, ._hex_to_uint64.error
         mov     x11, x1
@@ -176,7 +178,7 @@ _hexz_to_uint64:
         ldrb    w0, [x19]                   // get hex digit from buffer
         cbz     x0, ._hexz_to_uint64.return // no more data
 
-        bl      ._convert_hex_digit
+        bl      _convert_hex_digit
 
         cbnz    x0, ._hexz_to_uint64.error
         mov     x11, x1
