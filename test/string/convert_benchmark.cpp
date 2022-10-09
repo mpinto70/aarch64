@@ -44,7 +44,7 @@ void BM_StrzToUint64(benchmark::State& state) {
 }
 
 void BM_HexzToUint64(benchmark::State& state) {
-    BenchmarkStrzToInt(state, _hexz_to_uint64, "95ab20ca136");
+    BenchmarkStrzToInt(state, _hexz_to_uint64, "95AB20CA136");
 }
 
 BENCHMARK(BM_StrzToUint64);

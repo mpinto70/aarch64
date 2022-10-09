@@ -11,11 +11,38 @@
 // @param x19       address of a null terminated string with test name
 .global check_call
 
+.text
+// generates random bytes
+// @param[out] x0   begin of buffer to receive the random bytes
+// @param x1        # of bytes in buffer
+// @return          the return of system call
+.getrandom:
+    mov     x2, 0
+    mov     x8, 278     // ssize_t getrandom(void *buf, size_t buflen, unsigned int flags)
+    svc     0
+    ret
+
+.text
+// Creates a random number of 64 bits
+// @return x0   the 64 bit random number
+.getrandom_64:
+    stp     x29, x30, [sp, -128]!
+
+    add     x0, sp, 32
+    mov     x1, 8
+    bl      .getrandom
+
+    ldr     x0, [sp, 32]
+
+    ldp     x29, x30, [sp], 128      // restore x29, x30 (LR)
+    ret
+
+.text
 // fills registers x0 to x18 with strange values
 dirty_x0_x18:
     stp     x29, x30, [sp, -16]!
 
-    bl      _getrandom_64
+    bl      .getrandom_64
     ror     x1, x0, 3
     ror     x2, x1, 3
     ror     x3, x2, 3
