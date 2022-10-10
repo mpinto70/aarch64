@@ -1,11 +1,20 @@
 .text
 
-test._convert_hex_digit.ok:
-    stp     x29, x30, [sp, -48]!
+.macro prepare_func
+    stp     x29, x30, [sp, -32]!
     stp     x19, x20, [sp, 16]
-    stp     x21, x22, [sp, 32]
 
     bl      dirty_x0_x18            // put random values in registers
+.endm
+
+.macro finish_func
+    ldp     x19, x20, [sp, 16]
+    ldp     x29, x30, [sp], 32
+.endm
+
+test._convert_hex_digit.ok.0:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -16,7 +25,12 @@ test._convert_hex_digit.ok:
     mov     x0, '0'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.ok.9:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -27,7 +41,12 @@ test._convert_hex_digit.ok:
     mov     x0, '9'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.ok.A:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -38,7 +57,12 @@ test._convert_hex_digit.ok:
     mov     x0, 'A'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.ok.F:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -49,7 +73,12 @@ test._convert_hex_digit.ok:
     mov     x0, 'F'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.ok.a:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -60,7 +89,12 @@ test._convert_hex_digit.ok:
     mov     x0, 'a'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.ok.f:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -71,17 +105,12 @@ test._convert_hex_digit.ok:
     mov     x0, 'f'
     bl      check_call
 
-    ldp     x19, x20, [sp, 16]
-    ldp     x21, x22, [sp, 32]
-    ldp     x29, x30, [sp], 48
+    finish_func
     ret
 
-test._convert_hex_digit.error:
-    stp     x29, x30, [sp, -48]!
-    stp     x19, x20, [sp, 16]
-    stp     x21, x22, [sp, 32]
+test._convert_hex_digit.error.pre.0:
+    prepare_func
 
-    bl      dirty_x0_x18            // put random values in registers
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -91,7 +120,12 @@ test._convert_hex_digit.error:
     mov     x0, '/'                 // before '0'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.error.pos.9:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -101,7 +135,12 @@ test._convert_hex_digit.error:
     mov     x0, ':'                 // after '9'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.error.pre.A:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -111,7 +150,12 @@ test._convert_hex_digit.error:
     mov     x0, '@'                 // before 'A'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.error.pos.F:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -121,7 +165,12 @@ test._convert_hex_digit.error:
     mov     x0, 'G'                 // after 'F'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.error.pre.a:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -131,7 +180,12 @@ test._convert_hex_digit.error:
     mov     x0, '`'                 // before 'a'
     bl      check_call
 
-    bl      dirty_x0_x18            // put random values in registers
+    finish_func
+    ret
+
+test._convert_hex_digit.error.pos.f:
+    prepare_func
+
     ldr     x8, =FUNCTION_UNDER_TEST
     ldr     x19, =UNIT_TEST_ADDRESS
     ldr     x20, =UNIT_TEST_NAME
@@ -141,7 +195,5 @@ test._convert_hex_digit.error:
     mov     x0, 'g'                 // after 'f'
     bl      check_call
 
-    ldp     x19, x20, [sp, 16]
-    ldp     x21, x22, [sp, 32]
-    ldp     x29, x30, [sp], 48
+    finish_func
     ret

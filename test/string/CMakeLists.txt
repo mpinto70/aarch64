@@ -34,7 +34,6 @@ set(string_asm_srcs
 
 set(string_asm_libs
     string
-    sorting
     asm_framework
 )
 

@@ -77,6 +77,44 @@ test._right_pivot.ok:   // the name of the test has to have the form:
     ret                                 // and return
 ```
 
+### Useful macros
+
+You can define macros to simplify tests coding:
+
+```asm
+.macro prepare_func
+    stp     x29, x30, [sp, -32]!
+    stp     x19, x20, [sp, 16]
+
+    bl      dirty_x0_x18            // put random values in registers
+.endm
+
+.macro finish_func
+    ldp     x19, x20, [sp, 16]
+    ldp     x29, x30, [sp], 32
+.endm
+```
+
+With this the tests would be a little simpler:
+
+```asm
+test._convert_hex_digit.ok.0:
+    prepare_func        //<<<<< prepare the function
+
+    ldr     x8, =FUNCTION_UNDER_TEST
+    ldr     x19, =UNIT_TEST_ADDRESS
+    ldr     x20, =UNIT_TEST_NAME
+
+    mov     x9, 0x3                 // active result registers: x0, x1
+    mov     x10, 0                  // expected value for x0 = 0
+    mov     x11, 0                  // expected value for x1 = 0
+    mov     x0, '0'
+    bl      check_call
+
+    finish_func         //<<<<< finalize the test
+    ret
+```
+
 ## Implementation
 
 All registers are saved in the stack upon entry in check functions (size is 416):
