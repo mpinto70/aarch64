@@ -1,17 +1,15 @@
 .text
 
 .macro prepare_func
-    stp     x29, x30, [sp, -48]!
+    stp     x29, x30, [sp, -32]!
     stp     x19, x20, [sp, 16]
-    stp     x21, x22, [sp, 32]
 
     bl      dirty_x0_x18            // put random values in registers
 .endm
 
 .macro finish_func
     ldp     x19, x20, [sp, 16]
-    ldp     x21, x22, [sp, 32]
-    ldp     x29, x30, [sp], 48
+    ldp     x29, x30, [sp], 32
 .endm
 
 test._convert_hex_digit.ok.0:
