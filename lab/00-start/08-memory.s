@@ -1,5 +1,3 @@
-#include "local_unistd.h"
-
 .global _start
 
 .text
@@ -24,7 +22,7 @@ _start:
     bl      _allocate_memory
     // exit success
     mov     x0, 0
-    mov     x8, __NR_exit
+    mov     x8, 93          // __NR_exit
     svc     0
 
     // error processing
@@ -40,7 +38,7 @@ _start:
 
     ._start.exit_error:
     mov     x0, 1
-    mov     x8, __NR_exit
+    mov     x8, 93          // __NR_exit
     svc     0
 
 .data
@@ -52,14 +50,14 @@ _start:
 .text
 // @param x0    # of bytes to allocate
 _allocate_memory:
-    stp     x29, x30, [sp, -128]!
+    stp     x29, x30, [sp, -64]!
     stp     x19, x20, [sp, 16]
     stp     x21, x22, [sp, 32]
 
     mov     x19, x0             // # of bytes
 
     mov     x0, 0
-    mov     x8, __NR_brk
+    mov     x8, 214             // __NR_brk
     svc     0
 
     mov     x20, x0             // pointer to begin of brk
@@ -68,7 +66,7 @@ _allocate_memory:
     bl      _break_line
 
     add     x0, x20, x19        // allocate x19 bytes
-    mov     x8, __NR_brk
+    mov     x8, 214             // __NR_brk
     svc     0
 
     mov     x21, x0             // new end of brk
@@ -77,7 +75,7 @@ _allocate_memory:
     bl      _break_line
 
     mov     x0, x20             // restore brk space to begin
-    mov     x8, __NR_brk
+    mov     x8, 214             // __NR_brk
     svc     0
 
     bl      _print_int
@@ -85,5 +83,5 @@ _allocate_memory:
 
     ldp     x19, x20, [sp, 16]
     ldp     x21, x22, [sp, 32]
-    ldp     x29, x30, [sp], 128
+    ldp     x29, x30, [sp], 64
     ret

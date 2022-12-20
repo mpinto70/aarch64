@@ -70,4 +70,9 @@ elif [[ "$1" = "demo" ]]; then
     _demo
 else
     echo "Usage: `basename $0` [unit|asm|benchmark|ctest|clean]"
+    echo "    unit      - build and run google unit tests"
+    echo "    asm       - build and run ASM unit tests"
+    echo "    benchmark - build and run google benchmark tests"
+    echo "    ctest     - build and run google unit tests (from CMake)"
+    echo "    clean     - clean build"
 fi
