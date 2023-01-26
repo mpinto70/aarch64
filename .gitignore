@@ -33,6 +33,7 @@
 
 # build artifacts (dirs)
 build/
+build_vscode/
 bin/
 lib/
 gtest/

@@ -11,6 +11,17 @@
 // @param x19       address of a null terminated string with test name
 .global check_call
 
+.global expect_eq_val
+.global expect_ne_val
+.global expect_lo_val
+.global expect_ls_val
+.global expect_hi_val
+.global expect_hs_val
+.global expect_lt_val
+.global expect_le_val
+.global expect_gt_val
+.global expect_ge_val
+
 .text
 // generates random bytes
 // @param[out] x0   begin of buffer to receive the random bytes
@@ -191,20 +202,20 @@ dirty_x0_x18:
     strb    w6, [x3]
 .endm
 
-// print integer value
+// print unsigned integer value
 // @param x0    value to be printed
-_print_int:
+_print_uint:
     mov     x2, 0                   // size
     ldr     x3, =buffer             // write head into buffer (backwards)
     ldr     x4, =buffer_len
     add     x3, x3, x4
-    cbz     x0, .print_int.zero
+    cbz     x0, ._print_uint.zero
 
     mov     x4, 10
     mov     x7, 3
 
-    .print_int.loop:
-        cbz     x0, .print_int.str
+    ._print_uint.loop:
+        cbz     x0, ._print_uint.str
         sub     x3, x3, 1
         add     x2, x2, 1
         sub     x7, x7, 1
@@ -214,25 +225,47 @@ _print_int:
         add     x6, x6, '0'         // convert to char
         strb    w6, [x3]
         mov     x0, x5
-        cbnz    x7, .print_int.loop.no_thousand
+        cbnz    x7, ._print_uint.loop.no_thousand
         mov     x7, 3
         thousand_separator_in
-        .print_int.loop.no_thousand:
-        b       .print_int.loop
+        ._print_uint.loop.no_thousand:
+        b       ._print_uint.loop
 
-    .print_int.zero:
+    ._print_uint.zero:
     sub     x3, x3, 1
     mov     x6, '0'
     strb    w6, [x3]
     mov     x2, 1
 
-    .print_int.str:
+    ._print_uint.str:
     mov     x1, x3
     // x2 already has the size
     print_stderr
     ret
 
-// print an int
+// print signed integer value
+// @param x0    value to be printed
+_print_int:
+    clz     x9, x0
+
+    cbnz    x9, ._print_int.positive
+
+    mov     x9, x0  // save x0
+    print_str   txt_neg_signal, txt_neg_signal_len
+    neg     x0, x9  // invert signal
+
+    ._print_int.positive:
+
+    // will return from _print_uint
+    b       _print_uint
+
+// print an unsigned int
+.macro print_uint xN
+    mov     x0, \xN
+    bl      _print_uint
+.endm
+
+// print a signed int
 .macro print_int xN
     mov     x0, \xN
     bl      _print_int
@@ -347,15 +380,15 @@ print_error:
     mov     x15, x3
     mov     x16, x4
     print_str           error_in_register, error_in_register_len
-    print_int           x12
+    print_uint          x12
     print_str           separator_in, separator_in_len
-    print_int           x13
+    print_uint          x13
     mov                 x1, x15
     mov                 x2, x16
     print_stderr
-    print_int           x14
+    print_uint          x14
     print_str           separator_out, separator_out_len
-    ldr                 x0, [X11, 24]       // address of string name in x20
+    ldr                 x0, [x11, 24]       // address of string name in x20
     bl                  print_sz
     print_str           error_location, error_location_len
     ldr                 x14, [x11, 8]       // return address of caller x30
@@ -383,7 +416,7 @@ print_hex_error:
     mov     x15, x3
     mov     x16, x4
     print_str           error_in_register, error_in_register_len
-    print_int           x12
+    print_uint           x12
     print_str           separator_in, separator_in_len
     print_hex           x13
     mov                 x1, x15
@@ -391,7 +424,7 @@ print_hex_error:
     print_stderr
     print_hex           x14
     print_str           separator_out, separator_out_len
-    ldr                 x0, [X11, 24]       // address of string name in x20
+    ldr                 x0, [x11, 24]       // address of string name in x20
     bl                  print_sz
     print_str           error_location, error_location_len
     ldr                 x14, [x11, 8]       // return address of caller x30
@@ -416,7 +449,7 @@ print_hex_error:
         cmp                 x1, x2
         b.eq                .check_callee_registers.loop_registers.next
         increment_errors    x0, sp
-        add                 x0, x9, 19          // get the resiter number 19 + x9 (19..28)
+        add                 x0, x9, 19          // get the register number 19 + x9 (19..28)
         ldr                 x3, =eq_error
         ldr                 x4, =eq_error_len
         bl                  print_hex_error
@@ -487,6 +520,199 @@ check_call:
     restore_frame
     ret
 
+.macro prepare_expect
+    stp     x29, x30, [sp, -64]!
+    stp     x19, x20, [sp, 16]
+    stp     x21, x22, [sp, 32]
+    stp     x23, x24, [sp, 48]
+
+    mov     x20, x0
+    mov     x21, x1
+    mov     x22, x2
+    mov     x23, x3
+.endm
+
+.macro finish_expect
+    ldp     x19, x20, [sp, 16]
+    ldp     x21, x22, [sp, 32]
+    ldp     x23, x24, [sp, 48]
+    ldp     x29, x30, [sp], 64
+.endm
+
+// print string \str of length \len
+.macro print_epxect_error func, str, len
+    \func       x20
+    print_str   \str, \len
+    \func       x21
+    print_str   txt_from, txt_from_len
+    mov     x0, x23
+    bl      print_sz
+    print_str   txt_colon, txt_colon_len
+    ldr     x8, [sp, 8]         // return address of caller x30
+    sub     x8, x8, 4           // move to calling
+    sub     x8, x8, x22
+    print_hex   x8
+    print_ln
+    mov     x0, 1
+.endm
+
+// check that value in x0 == x1
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_eq_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.eq    .expect_functions_ok        // will return
+
+    print_epxect_error  print_uint, eq_error, eq_error_len
+    b       .expect_functions_return    // will return
+
+// check that value in x0 != x1
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_ne_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.ne    .expect_functions_ok        // will return
+
+    print_epxect_error  print_uint, ne_error, ne_error_len
+    b       .expect_functions_return    // will return
+
+// check that value in x0 < x1 (unsigned)
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_lo_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.lo    .expect_functions_ok        // will return
+
+    print_epxect_error  print_uint, lo_error, lo_error_len
+    b       .expect_functions_return    // will return
+
+// check that value in x0 <= x1 (unsigned)
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_ls_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.ls    .expect_functions_ok        // will return
+
+    print_epxect_error  print_uint, ls_error, ls_error_len
+    b       .expect_functions_return    // will return
+
+// check that value in x0 > x1 (unsigned)
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_hi_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.hi    .expect_functions_ok        // will return
+
+    print_epxect_error  print_uint, hi_error, hi_error_len
+    b       .expect_functions_return    // will return
+
+// check that value in x0 >= x1 (unsigned)
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_hs_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.hs    .expect_functions_ok        // will return
+
+    print_epxect_error  print_uint, hs_error, hs_error_len
+    b       .expect_functions_return
+
+// check that value in x0 < x1 (signed)
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_lt_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.lt    .expect_functions_ok        // will return
+
+    print_epxect_error  print_int, lo_error, lo_error_len
+    b       .expect_functions_return    // will return
+
+// check that value in x0 <= x1 (signed)
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_le_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.le    .expect_functions_ok        // will return
+
+    print_epxect_error  print_int, ls_error, ls_error_len
+    b       .expect_functions_return    // will return
+
+// check that value in x0 > x1 (signed)
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_gt_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.gt    .expect_functions_ok        // will return
+
+    print_epxect_error  print_int, hi_error, hi_error_len
+    b       .expect_functions_return    // will return
+
+// check that value in x0 >= x1 (signed)
+// @param x0        left hand value
+// @param x1        right hand value
+// @param x2        test function base address
+// @param x3        test name
+expect_ge_val:
+    prepare_expect
+
+    cmp     x20, x21
+    b.ge    .expect_functions_ok        // will return
+
+    print_epxect_error  print_int, hs_error, hs_error_len
+    b       .expect_functions_return
+
+// print ok message and return
+// @attention don't call with bl, call with b
+.expect_functions_ok:
+    print_str   txt_success, txt_success_len
+    mov     x0, xzr
+
+    b .expect_functions_return          // will return
+
+// restore registers and return
+// @attention don't call with bl, call with b
+.expect_functions_return:
+    ldp     x19, x20, [sp, 16]
+    ldp     x21, x22, [sp, 32]
+    ldp     x23, x24, [sp, 48]
+    ldp     x29, x30, [sp], 64
+    ret
+
 .data
 buffer:         //23456789 123456789 123456789 12
     .ascii      "                                "
@@ -505,6 +731,21 @@ separator_out_len = . - separator_out
 eq_error:
     .ascii      " != "
 eq_error_len = . - eq_error
+ne_error:
+    .ascii      " == "
+ne_error_len = . - ne_error
+lo_error:
+    .ascii      " >= "
+lo_error_len = . - lo_error
+ls_error:
+    .ascii      " > "
+ls_error_len = . - ls_error
+hi_error:
+    .ascii      " <= "
+hi_error_len = . - hi_error
+hs_error:
+    .ascii      " < "
+hs_error_len = . - hs_error
 error_location:
     .ascii      " + "
 error_location_len = . - error_location
@@ -514,3 +755,12 @@ txt_success_len = . - txt_success
 txt_error:
     .ascii      "x"
 txt_error_len = . - txt_error
+txt_from:
+    .ascii      " from "
+txt_from_len = . - txt_from
+txt_colon:
+    .ascii      ":"
+txt_colon_len = . - txt_colon
+txt_neg_signal:
+    .ascii      "-"
+txt_neg_signal_len = . - txt_neg_signal
