@@ -67,6 +67,7 @@ endfunction(add_benchmark_test)
 function(add_asm_test test_name sources_var libs_var)
     set(asm_test_name aut_${test_name})
     set(parser "${AUTF_PATH}/parser.py")
+    set(driver_name ${asm_test_name}.s)
 
     # https://crascit.com/2017/04/18/generated-sources-in-cmake-builds/
     set(sources_out "")
@@ -85,16 +86,16 @@ function(add_asm_test test_name sources_var libs_var)
     endforeach(source_in)
 
     add_custom_command(
-        OUTPUT autf_driver.s
-        COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/autf_driver.s && python ${parser} driver
+        OUTPUT ${driver_name}
+        COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/${driver_name} && python ${parser} driver
             -i ${sources_in_full}
-            -o ${CMAKE_CURRENT_BINARY_DIR}/autf_driver.s
+            -o ${CMAKE_CURRENT_BINARY_DIR}/${driver_name}
         DEPENDS ${sources_out}
     )
 
     add_executable(
         ${asm_test_name}
-        autf_driver.s
+        ${driver_name}
         ${sources_out}
     )
 

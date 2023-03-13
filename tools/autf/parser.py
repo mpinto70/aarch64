@@ -82,6 +82,8 @@ def parse_test(input_file: str, output_file: str):
 
 
 def create_driver(input_files: list, output_file: str):
+    # only filename no extension
+    file_name = os.path.splitext(os.path.basename(output_file))[0]
     all_tests = []
     for input_file in input_files:
         _, file_tests = parse_file(input_file)
@@ -95,6 +97,12 @@ def create_driver(input_files: list, output_file: str):
         "main:",
         "    stp     x29, x30, [sp, -32]!",
         "    stp     x19, x20, [sp, 16]",
+        "",
+        "    mov     x0, 1          // STDOUT",
+        "    ldr     x1, =driver_name",
+        "    ldr     x2, =driver_name_len",
+        "    mov     x8, 64",
+        "    svc     0",
         "",
         "    mov     x19, xzr       // error counter",
         "",
@@ -114,6 +122,9 @@ def create_driver(input_files: list, output_file: str):
         ".data",
         "    line_break:",
         '        .ascii      "\\n"',
+        "    driver_name:",
+        f'        .ascii      "{file_name} - "',
+        "    driver_name_len = . - driver_name",
     ]
 
     with open(output_file, "w") as file:
